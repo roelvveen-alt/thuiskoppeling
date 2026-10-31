@@ -1,0 +1,24 @@
+{
+  "app": {
+    "adres": "https://base44.app/api/apps/JOUW-APP-ID/functions/ontvangMeting",
+    "sleutel": "PLAK-HIER-DE-SLEUTEL-UIT-DE-APP"
+  },
+  "elke_seconden": 5,
+  "homewizard": [
+    { "naam": "Meterkast", "rol": "net", "adres": "192.168.1.20" },
+    { "naam": "Zon huis", "rol": "zon-en-batterij", "adres": "192.168.1.61" },
+    { "naam": "Zon dierenverblijf", "rol": "zon", "adres": "192.168.1.22" }
+  ],
+  "zendure": {
+    "manier": "cloud",
+    "cloudsleutel": "PLAK-HIER-DE-AUTORISATIECLOUDSLEUTEL-UIT-DE-ZENDURE-APP"
+  },
+  "zendure_p1": { "adres": "192.168.1.23" },
+  "prijzen": "zonneplan",
+  "vaste_kosten": {
+    "levering_per_maand": 6.25,
+    "netbeheer_per_maand": 39.66,
+    "vermindering_energiebelasting_per_maand": 52.41
+  },
+  "teruglevering_dit_jaar": { "jaar": 2026, "kwh": 7247 }
+}

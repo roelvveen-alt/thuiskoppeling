@@ -1,0 +1,39 @@
+{
+  "name": "thuiskoppeling",
+  "private": true,
+  "version": "1.6.1",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "voorbeeld": "node scripts/maakVoorbeeld.mjs",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "brug": "node brug/brug.mjs",
+    "adres": "node scripts/functieAdres.mjs",
+    "nieuwste": "node scripts/nieuwste.mjs",
+    "base44:login": "base44 login",
+    "base44:whoami": "base44 whoami"
+  },
+  "dependencies": {
+    "@base44/sdk": "0.8.57",
+    "lucide-react": "1.66.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@tailwindcss/vite": "4.3.3",
+    "@testing-library/react": "16.3.3",
+    "@vitejs/plugin-react": "6.1.2",
+    "base44": "0.2.6",
+    "eslint": "10.14.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.13.0",
+    "happy-dom": "21.0.4",
+    "tailwindcss": "4.3.3",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  }
+}

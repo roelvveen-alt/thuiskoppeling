@@ -1,0 +1,125 @@
+{
+  "name": "Dag",
+  "type": "object",
+  "description": "Eén dag van een huis (Nederlandse tijd): de totalen in kWh en euro, voor Week, Maand, Kwartaal en Jaar op het tabblad Overzicht. Eén rij per huis per dag. Alleen ontvangMeting schrijft dit, uit wat het programmaatje thuis meestuurt, hooguit één keer per kwartier; de functie huis (actie periode) leest het voor wie in dat huis mag. De site leest het nooit zelf.",
+  "properties": {
+    "huis_id": {
+      "type": "string",
+      "description": "Bij welk huis (Huis.id) deze dag hoort."
+    },
+    "datum": {
+      "type": "string",
+      "description": "De dag, Nederlandse tijd, bijvoorbeeld '2026-10-30'. Van middernacht tot middernacht."
+    },
+    "zon_kwh": { "type": "number", "description": "Opgewekt door alle panelen samen." },
+    "huis_kwh": { "type": "number", "description": "Gebruikt door het huis (zon + batterij + net)." },
+    "geladen_kwh": { "type": "number", "description": "In de batterij geladen." },
+    "ontladen_kwh": { "type": "number", "description": "Uit de batterij gekomen." },
+    "afname_kwh": { "type": "number", "description": "Afgenomen van het net (tellers van de P1-meter)." },
+    "teruglevering_kwh": { "type": "number", "description": "Teruggeleverd aan het net (tellers van de P1-meter)." },
+    "kosten_eur": { "type": "number", "description": "Betaald voor het afnemen, met de prijs van elk moment." },
+    "opbrengst_eur": { "type": "number", "description": "Gekregen voor het terugleveren, met Zonnebonus." },
+    "vaste_kosten_eur": {
+      "type": "number",
+      "description": "Vaste kosten van deze dag: levering en netbeheer min de korting op de energiebelasting. Min = per saldo geld terug. Leeg = niet ingevuld bij het programmaatje."
+    },
+    "zonnebonus_eur": {
+      "type": "number",
+      "description": "Ongeveer zoveel van de opbrengst was Zonnebonus: per kwartier wat er teruggeleverd werd maal de Zonnebonus van dat kwartier. Een schatting (het programmaatje telt hem niet apart). Leeg = geen prijzen bekend."
+    },
+    "afname_prijs_kwh": { "type": "number", "description": "Gemiddeld betaald per kWh afgenomen (kosten / afname). Leeg bij (bijna) niets afgenomen." },
+    "teruglevering_prijs_kwh": { "type": "number", "description": "Gemiddeld gekregen per kWh teruggeleverd (opbrengst / teruglevering). Leeg bij (bijna) niets teruggeleverd." },
+    "compleet": { "type": "boolean", "description": "Onwaar als een deel van de dag geen prijs had; dat deel zit dan niet in de bedragen." },
+    "eigen_verbruik": {
+      "type": "number",
+      "description": "Welk deel (0 tot 1) van de zonnestroom het huis of de batterij zelf gebruikte, met dezelfde verdeling als de app (src/lib/stroom.js): per meting (elke 5 s) als het programmaatje dat meestuurt (1.2.0), anders per kwartier. Leeg bij te weinig zon."
+    },
+    "zelfvoorzienend": {
+      "type": "number",
+      "description": "Welk deel (0 tot 1) van wat het huis gebruikte niet uit het net kwam, zoals de app: per meting (elke 5 s) als het programmaatje dat meestuurt (1.2.0), anders per kwartier. Leeg bij te weinig gemeten."
+    },
+    "fasen": {
+      "type": "array",
+      "description": "Per fase van de P1-meter het daggemiddelde en de piek van de stroom.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fase": { "type": "number", "description": "1, 2 of 3 (L1, L2, L3)." },
+          "gemiddeld_a": { "type": "number", "description": "Gemiddelde stroom die dag, in ampère." },
+          "piek_a": { "type": "number", "description": "Hoogste stroom die het programmaatje die dag zag." }
+        }
+      }
+    },
+    "kwartieren": {
+      "type": "number",
+      "description": "In hoeveel kwartieren van deze dag het programmaatje mat: 96 is de hele dag (92 of 100 als de klok verzet wordt)."
+    },
+    "huis_uur_wh": {
+      "type": "array",
+      "items": { "type": "number" },
+      "description": "Per uur van de klok (24 getallen, 0:00 tot 23:00, Nederlandse tijd): wat het huis gebruikte, in Wh. Daarmee leert de app het gewone verbruik per uur (Advies). Leeg bij dagen van voor november 2026."
+    },
+    "zon_uur_wh": {
+      "type": "array",
+      "items": { "type": "number" },
+      "description": "Per uur van de klok (24 getallen): wat de panelen leverden, in Wh. Leeg bij dagen van voor november 2026."
+    },
+    "straling_uur_wh_m2": {
+      "type": "array",
+      "items": { "type": "number" },
+      "description": "Per uur van de klok (24 getallen): de zonnestraling volgens het weerbericht (Meting.weer), in Wh per m². Met zon_uur_wh leert Advies wat de panelen van dit huis bij zoveel licht leveren. Leeg zonder weerbericht (programmaatje van voor 0.9.0)."
+    },
+    "zonnen_uur_wh": {
+      "type": "array",
+      "description": "Per plek met panelen (programmaatje 0.10.0, alleen bij twee of meer plekken): per uur van de klok (24 getallen) wat die plek leverde, in Wh. Daarmee leert het tabblad Voorspelling per plek. Leeg = één plek (dan is het zon_uur_wh), of een oudere versie.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sleutel": { "type": "string", "description": "De sleutel van de zonnebron, bijvoorbeeld 'hw-zon-huis'." },
+          "uur_wh": { "type": "array", "items": { "type": "number" }, "description": "Per uur van de klok (0:00 tot 23:00): wat deze plek leverde, in Wh." }
+        }
+      }
+    },
+    "omvormer_kwh": { "type": "number", "description": "Wat de omvormer (GoodWe) zelf zegt dat hij die dag opwekte, in kWh (de laatste stand van die dag). Leeg = geen omvormer gekoppeld." },
+    "omvormer_totaal_kwh": { "type": "number", "description": "De teller van de omvormer sinds hij er hangt, aan het eind van die dag, in kWh. Het verschil tussen twee dagen is wat die plek ertussen opwekte (ook over een jaar)." },
+    "omvormer_bij": { "type": "string", "description": "Bij welke zonnebron (zonnen[].sleutel) de omvormer hoort. Leeg = de eerste zonnebron." },
+    "apparaten_kwh": {
+      "type": "array",
+      "description": "Per apparaat wat het die dag gebruikte (programmaatje 0.12.0), hooguit 30, meeste kWh eerst: met een eigen meter (gemeten, precies) of herkend uit het huisverbruik (een schatting). Voor Overzicht › Apparaten. Leeg = een oudere versie, of een dag van voor het bijwerken.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sleutel": { "type": "string", "description": "De sleutel: van de meter (zoals 'hw-spa'), of bij een herkend apparaat 'h:soort' of 'h:soort:naam'." },
+          "soort": { "type": "string", "description": "De soort van een herkend apparaat (zoals 'wasmachine'). Leeg bij een eigen meter." },
+          "naam": { "type": "string", "description": "Een eigen naam, of de naam van de meter." },
+          "kwh": { "type": "number", "description": "Hoeveel kWh die dag." },
+          "keer": { "type": "number", "description": "Hoe vaak het die dag aan ging." },
+          "gemeten": { "type": "boolean", "description": "Waar = een eigen meter (precies); onwaar = herkend (een schatting)." }
+        }
+      }
+    },
+    "basis_kwh": {
+      "type": "number",
+      "description": "Wat de basis die dag gebruikte, in kWh (programmaatje 0.12.0): altijd-aan en een warmtepomp die langzaam meeloopt, zonder wat herkend of apart gemeten is. Leeg = een oudere versie."
+    },
+    "gas_m3": { "type": "number", "description": "Wat de gasmeter aan de slimme meter die dag telde, in m³ (programmaatje 1.4.0). Leeg = geen gasmeter aan de slimme meter, of een oudere versie." },
+    "water_m3": { "type": "number", "description": "Wat de watermeter aan de slimme meter die dag telde, in m³ (programmaatje 1.4.0). Leeg = geen." },
+    "warmte_gj": { "type": "number", "description": "Wat de warmtemeter aan de slimme meter die dag telde, in GJ (programmaatje 1.4.0). Leeg = geen." },
+    "uur_kwartieren": {
+      "type": "array",
+      "items": { "type": "number" },
+      "description": "Per uur van de klok (24 getallen): in hoeveel kwartieren er gemeten is (4 is het hele uur; 8 in het dubbele uur als de klok terug gaat). 0 = dat uur niet gemeten."
+    },
+    "sinds": { "type": "string", "format": "date-time", "description": "De eerste meting van die dag in het logboek van het programmaatje." },
+    "bijgewerkt": { "type": "string", "format": "date-time", "description": "Wanneer ontvangMeting deze rij het laatst bijwerkte (klok van Base44)." }
+  },
+  // Niemand leest of schrijft dit rechtstreeks. Schrijven doet alleen
+  // ontvangMeting, lezen de functie huis voor wie lid is van dat huis; beide
+  // met de rol van de server (base44/shared/toegang.js).
+  "rls": {
+    "create": { "user_condition": { "role": "admin" } },
+    "read": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}

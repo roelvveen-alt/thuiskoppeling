@@ -1,0 +1,55 @@
+node_modules
+brug/node_modules
+dist
+dist-voorbeeld
+.vite
+*.log
+
+# Geheimen: nooit in git
+.env
+.env.*
+base44/.app.jsonc
+brug/instellingen.json
+brug/instellingen.json.nieuw
+brug/op-afstand.json
+brug/op-afstand.json.nieuw
+brug/zonneplan-sessie.json
+brug/zonneplan-sessie.json.nieuw
+
+# Wat het programmaatje thuis onthoudt
+brug/vandaag.json
+brug/vandaag.json.nieuw
+brug/vandaag.json.vorige
+brug/vandaag.json.kapot
+brug/herkennen.json
+brug/herkennen.json.nieuw
+brug/herkennen.json.vorige
+brug/herkennen.json.kapot
+brug/batterij-geleerd.json
+brug/batterij-geleerd.json.nieuw
+brug/batterij-geleerd.json.vorige
+brug/batterij-geleerd.json.kapot
+brug/adressen.json
+brug/omvormer-sturen.json
+brug/omvormer-sturen.json.nieuw
+brug/omvormer-sturen.json.vorige
+brug/omvormer-sturen.json.kapot
+brug/spanning.json
+brug/spanning.json.nieuw
+brug/spanning.json.vorige
+brug/spanning.json.kapot
+brug/adressen.json.nieuw
+brug/opstart.txt
+brug/draait.pid
+brug/gestopt
+brug/brug.log
+brug/brug.log.1
+
+# Editor en systeem
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+
+# Werkmappen van Claude-helpers (git worktrees)
+.claude/worktrees/

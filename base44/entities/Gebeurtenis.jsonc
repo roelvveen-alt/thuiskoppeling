@@ -1,0 +1,42 @@
+{
+  "name": "Gebeurtenis",
+  "type": "object",
+  "description": "Het logboek van storingen van een huis: wat er mis was (de batterij, de omvormer, een meter, een melding van het programmaatje, of geen cijfers), wanneer het begon en wanneer het voorbij was. Alleen ontvangMeting schrijft dit, één keer bij het begin en één keer bij het einde (nooit per meting); de functie huis (actie logboek) leest de laatste voor wie in dat huis mag. De site leest het nooit zelf.",
+  "properties": {
+    "huis_id": {
+      "type": "string",
+      "description": "Bij welk huis (Huis.id) dit hoort."
+    },
+    "sleutel": {
+      "type": "string",
+      "description": "Wat er mis was, vast per onderwerp: 'batterij', 'omvormer:13' (storingsbit 13) of 'omvormer:stand', 'meter:<sleutel van het apparaat>', 'melding:<soort>:<onderwerp>', of 'stil' (geen cijfers)."
+    },
+    "soort": {
+      "type": "string",
+      "description": "batterij, omvormer, meter, melding of stil."
+    },
+    "wat": {
+      "type": "string",
+      "description": "In gewone woorden, hooguit 160 tekens, zonder adressen. Bijvoorbeeld 'P1-meter antwoordt niet' of 'Geen cijfers van het programmaatje'."
+    },
+    "begin": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Wanneer het begon (klok van Base44; bij 'stil' de laatste meting voor het gat)."
+    },
+    "eind": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Wanneer het voorbij was (de eerste meting zonder, of bij 'stil' de eerste meting na het gat). Leeg = speelt nog (of het einde is niet bekend)."
+    }
+  },
+  // Niemand leest of schrijft dit rechtstreeks. Schrijven doet alleen
+  // ontvangMeting, lezen de functie huis voor wie lid is van dat huis; beide
+  // met de rol van de server (base44/shared/toegang.js).
+  "rls": {
+    "create": { "user_condition": { "role": "admin" } },
+    "read": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}

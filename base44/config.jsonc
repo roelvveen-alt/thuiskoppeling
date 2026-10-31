@@ -1,0 +1,11 @@
+{
+  "name": "thuis-energie",
+  // Elke deploy zet de app weer op privé: alleen wie uitgenodigd is komt erin.
+  "visibility": "private",
+  "site": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "serveCommand": "npm run dev",
+    "outputDirectory": "./dist"
+  }
+}

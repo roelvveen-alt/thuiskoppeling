@@ -1,0 +1,18 @@
+{
+  "name": "thuis-energie-brug",
+  "version": "1.6.1",
+  "private": true,
+  "description": "Leest HomeWizard, Zendure, GoodWe en Tuya thuis uit (alleen lezen; de GoodWe alleen begrenzen bij een negatieve prijs, als de eigenaar dat aanzet) en stuurt de stand naar de app in Base44.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node brug.mjs",
+    "proef": "node brug.mjs proef",
+    "zoek": "node brug.mjs zoek"
+  },
+  "dependencies": {
+    "mqtt": "5.16.1"
+  }
+}

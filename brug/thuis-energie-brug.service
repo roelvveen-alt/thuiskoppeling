@@ -1,0 +1,28 @@
+# Het programmaatje altijd laten draaien op een Raspberry Pi (of andere Linux-computer).
+#
+# 1. Pas hieronder de gebruiker en de map aan als die bij jou anders zijn.
+# 2. sudo cp thuis-energie-brug.service /etc/systemd/system/
+# 3. sudo systemctl enable --now thuis-energie-brug
+# 4. Meekijken: journalctl -u thuis-energie-brug -f
+# 5. Bijwerken: sh ~/thuis-energie/brug/bijwerken.sh (sinds 0.13.0 ook onder systemd:
+#    hij start via systemctl opnieuw, nooit start.sh ernaast).
+#
+# Na een stroomstoring of herstart begint hij vanzelf weer.
+
+[Unit]
+Description=Thuis-energie: HomeWizard en Zendure naar de app
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/thuis-energie/brug
+ExecStart=/usr/bin/node brug.mjs
+Restart=always
+RestartSec=30
+# Wat hij maakt (instellingen, sessie, vandaag.json) is alleen voor deze gebruiker.
+UMask=0077
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,732 @@
+{
+  "name": "Meting",
+  "type": "object",
+  "description": "De laatste stand van een huis: wat de meters nu meten. Het programmaatje thuis (brug/) stuurt die elke ~5 seconden naar de functie ontvangMeting, die per huis één rij overschrijft. Geen geschiedenis.",
+  "properties": {
+    "huis_id": {
+      "type": "string",
+      "description": "Bij welk huis (Huis.id) deze stand hoort. Leeg = van voor de omgevingen (oktober 2026); die rij leest niemand meer."
+    },
+    "moment": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Wanneer Base44 deze stand ontving. De klok van Base44, niet die van het apparaatje thuis: die kan scheef staan."
+    },
+    "net_w": {
+      "type": "number",
+      "description": "Vermogen bij de meterkast (HomeWizard P1-meter), in watt. Plus = je neemt af van het net, min = je levert terug. Leeg = geen P1-meter gekoppeld."
+    },
+    "net_zendure_w": {
+      "type": "number",
+      "description": "Wat de Zendure P1-meter op dezelfde meterkast meet, in watt, zelfde teken als net_w. Om de twee meters te vergelijken, en als reserve (zie net_bron). Leeg = geen Zendure P1-meter."
+    },
+    "net_bron": {
+      "type": "string",
+      "description": "Van welke meter net_w komt: 'homewizard' (de HomeWizard P1, gewoon) of 'zendure-p1' (reserve: de HomeWizard P1 antwoordde niet, of er is er geen). Leeg = geen meter op het net, of een oudere versie van het programmaatje."
+    },
+    "zon_w": {
+      "type": "number",
+      "description": "Wat alle zonnepanelen samen nu leveren, in watt: de som van zonnen. Leeg = geen panelen gekoppeld."
+    },
+    "zonnen": {
+      "type": "array",
+      "description": "Elke plek met panelen apart, bijvoorbeeld het huis en het dierenverblijf. Elk krijgt een eigen rondje op de foto.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sleutel": { "type": "string", "description": "Vaste naam, bijvoorbeeld 'hw-batterij-zon'." },
+          "naam": { "type": "string", "description": "Hoe het in de app heet, bijvoorbeeld 'Zon huis'." },
+          "vermogen_w": { "type": "number", "description": "Wat deze panelen nu leveren, in watt. Bij een meter op zon én batterij uitgerekend met de Zendure." }
+        }
+      }
+    },
+    "batterij_w": {
+      "type": "number",
+      "description": "Plus = de batterij levert stroom (ontladen), min = de batterij laadt. In watt. Leeg = geen batterij gekoppeld."
+    },
+    "batterij_procent": {
+      "type": "number",
+      "description": "Hoe vol de batterij is, 0 tot 100."
+    },
+    "batterij_info": {
+      "type": "object",
+      "description": "Meer over de batterij, zoals de Zendure het zelf meldt (programmaatje 0.5.0 en nieuwer): temperatuur, spanning, grenzen, hoe lang nog. Elke keer, net als batterij_w; leeg = geen batterij, of een oudere versie. Alleen wat de Zendure meldt, nooit serienummers.",
+      "properties": {
+        "temp_c": { "type": "number", "description": "De warmste accu: de hoogste celtemperatuur, in °C." },
+        "temp_min_c": { "type": "number", "description": "De koelste accu, in °C (alleen bij twee of meer accu's)." },
+        "behuizing_c": { "type": "number", "description": "De temperatuur binnenin de Zendure, in °C." },
+        "spanning_v": { "type": "number", "description": "De spanning van de batterij, in volt." },
+        "stroom_a": { "type": "number", "description": "De stroom van of naar de accu's, in ampère, zonder teken (de richting staat in batterij_w)." },
+        "laadgrens_pct": { "type": "number", "description": "Tot hoe vol hij laadt (ingesteld in de Zendure-app), in procent." },
+        "ontlaadgrens_pct": { "type": "number", "description": "Tot hoe leeg hij ontlaadt (ingesteld in de Zendure-app), in procent." },
+        "vol_over_min": { "type": "number", "description": "Bij laden: over hoeveel minuten hij ongeveer tot de laadgrens vol is." },
+        "leeg_over_min": { "type": "number", "description": "Bij leveren: over hoeveel minuten hij ongeveer tot de ontlaadgrens leeg is." },
+        "verwarmt": { "type": "boolean", "description": "Waar als hij zichzelf nu verwarmt (bij kou)." },
+        "kalibreert": { "type": "boolean", "description": "Waar als hij nu zijn batterijstand opnieuw afstelt." },
+        "wifi_dbm": { "type": "number", "description": "Het wifi-signaal bij de Zendure, in dBm (−60 of hoger is goed)." },
+        "pakketten": { "type": "number", "description": "Hoeveel accu's eraan zitten." },
+        "inhoud_kwh": { "type": "number", "description": "Wat de accu's samen kunnen bevatten, in kWh (afgeleid van het soort accu)." },
+        "gezondheid_pct": { "type": "number", "description": "De gezondheid van de zwakste accu, in procent (niet elke Zendure meldt dit)." },
+        "storing": { "type": "boolean", "description": "Waar als de Zendure een storing meldt." },
+        "storing_niveau": { "type": "number", "description": "Hoe ernstig die storing is, zoals de Zendure het meldt (faultLevel)." },
+        "cel_min_v": { "type": "number", "description": "De laagste celspanning van alle accu's, in volt (programmaatje 1.4.0, minVol)." },
+        "cel_max_v": { "type": "number", "description": "De hoogste celspanning van alle accu's, in volt (programmaatje 1.4.0, maxVol)." },
+        "invoer_limiet_w": { "type": "number", "description": "Hoeveel hij hooguit uit het stopcontact laadt, ingesteld in de Zendure-app, in watt (programmaatje 1.4.0, inputLimit)." },
+        "uitvoer_limiet_w": { "type": "number", "description": "Hoeveel hij hooguit aan het huis levert, ingesteld in de Zendure-app, in watt (programmaatje 1.4.0, outputLimit)." },
+        "omvormer_max_w": { "type": "number", "description": "Het hoogste vermogen van de omvormer in de Zendure, in watt (programmaatje 1.4.0, inverseMaxPower)." },
+        "geleerd": {
+          "type": "object",
+          "description": "Wat het programmaatje van deze batterij leerde (programmaatje 1.4.0): hoeveel kWh er echt uit of in gaat per procent laadniveau, met alle verlies erin. Voor de schatting hoe lang nog. Leeg = nog niets geleerd, of een oudere versie.",
+          "properties": {
+            "kwh_per_pct_leveren": { "type": "number", "description": "kWh die er echt uitkomt per procent dat het laadniveau zakt." },
+            "kwh_per_pct_laden": { "type": "number", "description": "kWh die er echt in moet per procent dat het laadniveau stijgt." },
+            "metingen": { "type": "number", "description": "Uit hoeveel stukken van minstens 10% het geleerd is." }
+          }
+        },
+        "accus": {
+          "type": "array",
+          "description": "Per accu (programmaatje 0.7.0 en nieuwer; hooguit 8, sinds 1.4.0 hooguit 18: drie SolarFlow 2400 AC's met elk 6), op volgorde: Accu 1, 2, 3. Geen serienummers. Leeg = een oudere versie.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "nr": { "type": "number", "description": "Welke accu: 1, 2, 3, … (de plek waarop de Zendure hem meldt)." },
+              "temp_c": { "type": "number", "description": "De hoogste celtemperatuur van deze accu, in °C." },
+              "procent": { "type": "number", "description": "Hoe vol deze accu is, 0 tot 100." },
+              "cel_min_v": { "type": "number", "description": "De laagste celspanning in deze accu, in volt (programmaatje 1.4.0)." },
+              "cel_max_v": { "type": "number", "description": "De hoogste celspanning in deze accu, in volt (programmaatje 1.4.0)." },
+              "gezondheid_pct": { "type": "number", "description": "De gezondheid van deze accu, in procent (programmaatje 1.4.0, als hij het meldt)." },
+              "cycli": { "type": "number", "description": "Hoeveel laadcycli deze accu had (programmaatje 1.4.0, als hij het meldt)." },
+              "verwarmt": { "type": "boolean", "description": "Waar als deze accu zich nu verwarmt (programmaatje 1.4.0)." }
+            }
+          }
+        }
+      }
+    },
+    "omvormer": {
+      "type": "object",
+      "description": "Wat de omvormer van de zonnepanelen zelf meldt (GoodWe DT-serie, programmaatje 0.6.0 en nieuwer, alleen lezen): stand, storingen, spanningen, temperatuur, opbrengst. Elke keer, net als batterij_info; leeg = geen omvormer gekoppeld, of een oudere versie. Nooit het type of serienummer.",
+      "properties": {
+        "bij": { "type": "string", "description": "De sleutel van de zonnebron (zonnen[].sleutel) waar deze omvormer bij hoort, bijvoorbeeld 'hw-zon-huis'. Leeg = de eerste zonnebron." },
+        "stand": { "type": "string", "description": "normaal (levert), wacht, storing, controle, onbekend, slaapt (geen antwoord 's nachts: uit) of weg (overdag geen antwoord)." },
+        "w": { "type": "number", "description": "Wat de omvormer nu aan het huis levert, in watt." },
+        "rijen": {
+          "type": "array",
+          "description": "Per paneelrij (MPPT), op volgorde: rij 1, rij 2, …",
+          "items": {
+            "type": "object",
+            "properties": {
+              "v": { "type": "number", "description": "Spanning van de panelen, in volt." },
+              "a": { "type": "number", "description": "Stroom van de panelen, in ampère." }
+            }
+          }
+        },
+        "fasen": {
+          "type": "array",
+          "description": "Per fase van het net, op volgorde L1, L2, L3, zoals de omvormer het meet.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "v": { "type": "number", "description": "Netspanning (tegen nul), in volt." },
+              "a": { "type": "number", "description": "Stroom van de omvormer op deze fase, in ampère." }
+            }
+          }
+        },
+        "hz": { "type": "number", "description": "Netfrequentie, in hertz." },
+        "temp_c": { "type": "number", "description": "Temperatuur binnenin de omvormer, in °C." },
+        "vandaag_kwh": { "type": "number", "description": "Opbrengst vandaag, in kWh (ook als hij slaapt: de laatste van vandaag)." },
+        "totaal_kwh": { "type": "number", "description": "Opbrengst sinds de omvormer er hangt, in kWh." },
+        "storingen": { "type": "array", "description": "De foutbits die aan staan (0–31); de app zegt wat ze betekenen.", "items": { "type": "number" } },
+        "waarschuwing": { "type": "number", "description": "De waarschuwingscode van de omvormer, als die niet 0 is." },
+        "beperkt": { "type": "array", "description": "Waarom hij minder levert, als bits (0 = te warm, …); de app zegt wat ze betekenen.", "items": { "type": "number" } },
+        "pf": { "type": "number", "description": "De arbeidsfactor (1 is ideaal), alleen als hij levert (programmaatje 1.4.0)." },
+        "bus_v": { "type": "number", "description": "De spanning binnenin de omvormer (busspanning), in volt (programmaatje 1.4.0)." },
+        "koelplaat_c": { "type": "number", "description": "De temperatuur van de koelplaat, in °C (programmaatje 1.4.0)." },
+        "uren": { "type": "number", "description": "Hoeveel uur de omvormer in totaal in bedrijf was (programmaatje 1.4.0)." },
+        "isolatie_kohm": { "type": "number", "description": "De isolatieweerstand van de panelen naar aarde, in kΩ (programmaatje 1.4.0, register 30173; de eenheid is nog niet bevestigd)." },
+        "lekstroom_ma": { "type": "number", "description": "De lekstroom naar aarde, in mA (programmaatje 1.4.0, register 30210; nog niet bevestigd)." },
+        "sturen": {
+          "type": "object",
+          "description": "Het begrenzen bij een negatieve prijs (programmaatje 1.5.0, brug/omvormerPlan.mjs): de instelling zoals het programmaatje hem kent, de stand en het plan. Alleen de eigenaar ziet dit; een kijker niet.",
+          "properties": {
+            "aan": { "type": "boolean", "description": "Waar = de eigenaar zette het aan (zoals het programmaatje het hoorde)." },
+            "stand": { "type": "string", "description": "onbekend, vrij, begrensd (door het programmaatje) of eigen (een grens die niet van het programmaatje is)." },
+            "pct": { "type": "number", "description": "De grens die het programmaatje zette, in procent van het vermogen (0–90)." },
+            "sinds": { "type": "string", "format": "date-time", "description": "Sinds wanneer begrensd." },
+            "door": { "type": "string", "description": "'programmaatje'." },
+            "aanpassingen": { "type": "number", "description": "Hoe vaak de grens in dit blok aan het verbruik is aangepast." },
+            "doel_w": { "type": "number", "description": "Waar de grens op mikt: het eigen verbruik plus een marge, in watt." },
+            "grens_pct": { "type": "number", "description": "Bij stand eigen: de grens die er staat, in procent." },
+            "verbruik_w": { "type": "number", "description": "Het gewone eigen verbruik overdag, in watt (voor 'begrensd tot ~1,2 kW' in het plan)." },
+            "blokken": {
+              "type": "array",
+              "description": "Het plan: de blokken van vandaag en morgen waarin terugleveren geld kost (of de prijs negatief is maar het niet loont).",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "van": { "type": "string", "format": "date-time", "description": "Begin." },
+                  "tot": { "type": "string", "format": "date-time", "description": "Einde." },
+                  "laagste": { "type": "number", "description": "De laagste waarde van een teruggeleverde kWh in het blok, in euro (onder nul = kost geld); bij loont-niet de laagste kale prijs." },
+                  "modus": { "type": "string", "description": "'deels' (tot het eigen verbruik), 'uit' (ook afnemen levert geld op) of 'loont-niet'." },
+                  "reden": { "type": "string", "description": "Bij loont-niet: 'saldering' (vanaf 2027 wel)." },
+                  "niet": { "type": "string", "description": "Waarom dit blok niet (meer): 'dag' (die dag niet), 'nu-aan', 'mislukt' of 'anders' (iemand anders gaf hem vrij)." }
+                }
+              }
+            },
+            "nu_aan": { "type": "boolean", "description": "Waar = in het blok van nu koos de eigenaar 'Nu weer aan'." },
+            "fout": { "type": "string", "description": "begrenzen, vrijgeven, eigen of rem (de schrijfrem houdt het even tegen)." },
+            "fout_sinds": { "type": "string", "format": "date-time", "description": "Sinds wanneer de fout." },
+            "vrij_op": { "type": "string", "format": "date-time", "description": "De laatste 'Nu weer aan' die het programmaatje oppakte." },
+            "grens_w": { "type": "number", "description": "Bij stand begrensd: wat de omvormer volgens de grens nog mag leveren, in watt (programmaatje 1.6.0)." },
+            "controle": {
+              "type": "object",
+              "description": "De zelfcontrole na een begrenzing (programmaatje 1.6.0): leeg = nog niet nagekeken.",
+              "properties": {
+                "uitkomst": { "type": "string", "description": "bezig, werkt of werkt-niet (dan stuurt het programmaatje niet meer tot de eigenaar het opnieuw aanzet)." },
+                "op": { "type": "string", "format": "date-time", "description": "Wanneer nagekeken." },
+                "pct": { "type": "number", "description": "De grens bij het nakijken, in procent." },
+                "voor_w": { "type": "number", "description": "Wat de omvormer vlak voor het begrenzen leverde, in watt." },
+                "na_w": { "type": "number", "description": "Wat hij begrensd leverde (het midden van de metingen), in watt." },
+                "via": { "type": "string", "description": "Bij werkt: 'omvormer' (hij leverde niet meer dan de grens) of 'net' (de teruglevering op de P1 zakte)." },
+                "reden": { "type": "string", "description": "Bij werkt-niet: 'geen-effect' of 'te-veel' (veel minder dan bedoeld: de grens telt anders)." }
+              }
+            },
+            "oorspronkelijk": {
+              "type": "object",
+              "description": "Hoe de omvormer stond voor het programmaatje hem ooit bediende (programmaatje 1.6.0), voor de geschiedenis.",
+              "properties": {
+                "grens_pct": { "type": "number", "description": "De teruglevergrens (register 40336)." },
+                "schakelaar": { "type": "boolean", "description": "Stond de schakelaar van die grens (register 40327) aan." },
+                "op": { "type": "string", "format": "date-time", "description": "Wanneer het programmaatje dat las." }
+              }
+            }
+          }
+        }
+      }
+    },
+    "meterkast": {
+      "type": "object",
+      "description": "Wat de P1-meter verder over de meterkast weet (programmaatje 1.4.0): het tarief van nu, de maandpiek en de meters die aan de slimme meter hangen (gas, water, warmte). Elke keer, net als fasen; leeg = geen P1-meter, of een oudere versie. Nooit ids of de wifinaam.",
+      "properties": {
+        "tarief": { "type": "number", "description": "Het tarief van nu zoals de slimme meter telt: in Nederland 1 = dal, 2 = normaal." },
+        "gemiddeld_w": { "type": "number", "description": "Het gemiddelde vermogen van het lopende kwartier, in watt." },
+        "maandpiek_w": { "type": "number", "description": "Het hoogste kwartiergemiddelde van deze maand, in watt (vooral in België)." },
+        "maandpiek_op": { "type": "string", "format": "date-time", "description": "Wanneer die maandpiek was." },
+        "meters": {
+          "type": "array",
+          "description": "Per meter aan de slimme meter (hooguit 5): gas, water, warmte, warm_water of warmte_in.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "soort": { "type": "string", "description": "gas, water, warmte, warm_water of warmte_in." },
+              "stand": { "type": "number", "description": "De meterstand." },
+              "eenheid": { "type": "string", "description": "m3, GJ, kWh of MWh." },
+              "op": { "type": "string", "format": "date-time", "description": "Wanneer de meter deze stand doorgaf (een gasmeter elke 5 minuten tot elk uur)." },
+              "vandaag": { "type": "number", "description": "Wat deze meter vandaag telde (sinds de laatste stand van gisteren), in dezelfde eenheid." }
+            }
+          }
+        }
+      }
+    },
+    "apparaten": {
+      "type": "array",
+      "description": "Apparaten met een eigen meter (HomeWizard Energy Socket of kWh-meter).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sleutel": { "type": "string", "description": "Vaste naam voor dit apparaat, bijvoorbeeld 'hw-3c39e7aabbcc' (het serienummer van de meter)." },
+          "naam": { "type": "string", "description": "Hoe het in de app heet, bijvoorbeeld 'Wasmachine'." },
+          "soort": { "type": "string", "description": "Voor het plaatje: wasmachine, vaatwasser, koelkast, laadpaal, warmtepomp, boiler, … of stekker." },
+          "vermogen_w": { "type": "number", "description": "Wat het nu gebruikt, in watt." }
+        }
+      }
+    },
+    "lampen": {
+      "type": "array",
+      "description": "Lampen en schakelaars zonder meter (Tuya, programmaatje 0.8.0 en nieuwer, hooguit 20): alleen of ze aan zijn. Elke keer, net als apparaten; leeg = geen, of een oudere versie. De app kijkt alleen, schakelt nooit.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sleutel": { "type": "string", "description": "Vaste naam, bijvoorbeeld 'tuya-spots-overstek'." },
+          "naam": { "type": "string", "description": "Hoe het in de app heet, bijvoorbeeld 'Spots overstek'." },
+          "soort": { "type": "string", "description": "'lamp' of 'schakelaar'." },
+          "aan": { "type": "boolean", "description": "Waar als hij aan is; leeg = niet bekend (geen antwoord)." },
+          "helderheid": { "type": "number", "description": "Hoe fel, 1 tot 100 procent (alleen bij een lamp die aan is)." },
+          "rol": { "type": "string", "description": "'spots': de spotjes in het overstek van het huis (die branden dan op de tekening)." }
+        }
+      }
+    },
+    "bron": {
+      "type": "string",
+      "description": "Welke versie van het programmaatje dit stuurde, bijvoorbeeld 'brug 0.1.0'."
+    },
+    "prijs": {
+      "type": "object",
+      "description": "De stroomprijs van dit moment, in euro per kWh, alles erin (btw, energiebelasting, opslag). Het programmaatje haalt hem bij de leverancier (Zonneplan).",
+      "properties": {
+        "afname_kwh": { "type": "number", "description": "Wat een kWh uit het net nu kost. Kan onder nul zakken." },
+        "teruglevering_kwh": { "type": "number", "description": "Wat een kWh terugleveren nu oplevert, met Zonnebonus als die nu geldt. Kan onder nul zakken." },
+        "zonnebonus_kwh": { "type": "number", "description": "Het deel van de terugleverprijs dat Zonnebonus is (0 als hij nu niet geldt)." },
+        "van": { "type": "string", "format": "date-time", "description": "Begin van het tijdvak van deze prijs." },
+        "tot": { "type": "string", "format": "date-time", "description": "Eind van het tijdvak van deze prijs." },
+        "bron": { "type": "string", "description": "Waar de prijs vandaan komt, bijvoorbeeld 'Zonneplan'." }
+      }
+    },
+    "vandaag": {
+      "type": "object",
+      "description": "Wat er vandaag (Nederlandse tijd) door de meterkast ging en wat dat kostte of opleverde, met de prijs van elk moment.",
+      "properties": {
+        "datum": { "type": "string", "description": "De dag, bijvoorbeeld '2026-10-30'." },
+        "afname_kwh": { "type": "number", "description": "Afgenomen van het net." },
+        "teruglevering_kwh": { "type": "number", "description": "Teruggeleverd aan het net." },
+        "kosten_eur": { "type": "number", "description": "Betaald voor het afnemen." },
+        "opbrengst_eur": { "type": "number", "description": "Gekregen voor het terugleveren." },
+        "vaste_kosten_eur": {
+          "type": "number",
+          "description": "Vaste kosten van deze dag: levering en netbeheer min de korting op de energiebelasting (per maand, gedeeld door de dagen van de maand). Min = per saldo geld terug. Leeg = niet ingevuld."
+        },
+        "compleet": { "type": "boolean", "description": "Onwaar als een deel van de dag geen prijs had; dat deel zit dan niet in de bedragen." }
+      }
+    },
+    "jaar": {
+      "type": "object",
+      "description": "Wat er dit kalenderjaar is teruggeleverd. De Zonnebonus geldt voor de eerste 7.500 kWh teruglevering per jaar.",
+      "properties": {
+        "jaar": { "type": "number", "description": "Het jaar, bijvoorbeeld 2026." },
+        "teruglevering_kwh": { "type": "number", "description": "Zoveel kWh is dit jaar teruggeleverd (uit de teller van de P1-meter)." },
+        "plafond_kwh": { "type": "number", "description": "Het plafond, 7500." }
+      }
+    },
+    "fasen": {
+      "type": "array",
+      "description": "Per fase van de P1-meter nu. Bij een eenfase-aansluiting één fase.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fase": { "type": "number", "description": "1, 2 of 3 (L1, L2, L3)." },
+          "w": { "type": "number", "description": "Vermogen op deze fase in watt; min = terugleveren op deze fase." },
+          "a": { "type": "number", "description": "Stroom op deze fase in ampère (zonder teken)." },
+          "v": { "type": "number", "description": "Spanning op deze fase in volt." }
+        }
+      }
+    },
+    "voorspelling": {
+      "type": "object",
+      "description": "De stroomprijzen per kwartier van vandaag (vanaf middernacht) en, vanaf ~13:00, morgen, met dezelfde regels als prijs. Elke rij begint bij van en loopt per stap_min minuten aaneengesloten door. Het programmaatje stuurt hem alleen mee als hij verandert.",
+      "properties": {
+        "van": { "type": "string", "format": "date-time", "description": "Begin van het eerste kwartier." },
+        "stap_min": { "type": "number", "description": "Minuten per stap: 15." },
+        "afname_kwh": { "type": "array", "items": { "type": "number" }, "description": "Per kwartier: wat een kWh uit het net kost." },
+        "teruglevering_kwh": { "type": "array", "items": { "type": "number" }, "description": "Per kwartier: wat een kWh terugleveren oplevert, met Zonnebonus." },
+        "zonnebonus_kwh": { "type": "array", "items": { "type": "number" }, "description": "Per kwartier: het deel dat Zonnebonus is." },
+        "schatting": { "type": "boolean", "description": "Waar als Zonneplan niet antwoordde en het een schatting via EnergyZero is." },
+        "bron": { "type": "string", "description": "Waar de prijzen vandaan komen, bijvoorbeeld 'Zonneplan'." }
+      }
+    },
+    "weer": {
+      "type": "object",
+      "description": "Het weerbericht per uur van vandaag en morgen (programmaatje 0.9.0, Open-Meteo), voor Advies. Plek i is het uur dat begint op van + i uur. Elke reeks is even lang; een reeks die er niet is, ontbreekt. Het programmaatje stuurt hem als hij verandert (hooguit eens per uur) en eens per kwartier.",
+      "properties": {
+        "van": { "type": "string", "format": "date-time", "description": "Begin van het eerste uur (23:00 de dag ervoor, Nederlandse tijd)." },
+        "stap_min": { "type": "number", "description": "Minuten per stap: 60." },
+        "straling_wm2": { "type": "array", "items": { "type": "number" }, "description": "Per uur: de gemiddelde zonnestraling op de grond (W/m²)." },
+        "bewolking_pct": { "type": "array", "items": { "type": "number" }, "description": "Per uur: de bewolking aan het eind van dat uur, 0 tot 100." },
+        "temp_c": { "type": "array", "items": { "type": "number" }, "description": "Per uur: de temperatuur buiten op 2 m aan het eind van dat uur (°C)." },
+        "weercode": { "type": "array", "items": { "type": "number" }, "description": "Per uur (programmaatje 0.10.0): de WMO-weercode aan het eind van dat uur (0 onbewolkt … 99 zwaar onweer met hagel; zie src/lib/weerBeeld.js), voor het tabblad Voorspelling." },
+        "neerslag_mm": { "type": "array", "items": { "type": "number" }, "description": "Per uur (0.10.0): de neerslag in dat uur, in mm." },
+        "neerslag_kans_pct": { "type": "array", "items": { "type": "number" }, "description": "Per uur (0.10.0): de kans op meer dan 0,1 mm neerslag in dat uur, 0 tot 100." },
+        "windstoten_kmh": { "type": "array", "items": { "type": "number" }, "description": "Per uur (0.10.0): de hardste windstoot op 10 m in dat uur, in km/h." },
+        "nu": {
+          "type": "object",
+          "description": "Het weer van nu (Open-Meteo current), voor de tekening van het huis. Wat er niet is, ontbreekt.",
+          "properties": {
+            "code": { "type": "number", "description": "De WMO-weercode (0 onbewolkt … 99 zwaar onweer met hagel; zie src/lib/weerBeeld.js)." },
+            "neerslag_mm": { "type": "number", "description": "Neerslag in mm (het laatste kwartier)." },
+            "wind_kmh": { "type": "number", "description": "Wind op 10 m in km/h." },
+            "windstoten_kmh": { "type": "number", "description": "Windstoten op 10 m in km/h." },
+            "bewolking_pct": { "type": "number", "description": "Bewolking, 0 tot 100." }
+          }
+        },
+        "opgehaald": { "type": "string", "format": "date-time", "description": "Wanneer het programmaatje dit bericht ophaalde. Ouder dan een paar uur: Advies laat het liggen." },
+        "bron": { "type": "string", "description": "Waar het weer vandaan komt: 'open-meteo'." }
+      }
+    },
+    "dag": {
+      "type": "object",
+      "description": "Vandaag per kwartier: het gemiddelde vermogen van zon, huis, batterij en net en hoe vol de batterij was, plus kWh tot nu. Begint elke dag leeg. Het programmaatje stuurt hem elke minuut mee.",
+      "properties": {
+        "datum": { "type": "string", "description": "De dag, bijvoorbeeld '2026-10-30'." },
+        "van": { "type": "string", "format": "date-time", "description": "Middernacht van die dag (Nederlandse tijd)." },
+        "stap_min": { "type": "number", "description": "Minuten per stap: 15." },
+        "sinds": { "type": "string", "format": "date-time", "description": "De eerste meting van vandaag in dit logboek; daarvoor is er niets." },
+        "metingen": { "type": "array", "items": { "type": "number" }, "description": "Per kwartier: hoeveel metingen erin zitten. 0 = geen meting (de waarden zijn dan 0)." },
+        "zon_w": { "type": "array", "items": { "type": "number" }, "description": "Per kwartier: wat de panelen gemiddeld leverden, in watt." },
+        "huis_w": { "type": "array", "items": { "type": "number" }, "description": "Per kwartier: wat het huis gemiddeld gebruikte (zon + batterij + net)." },
+        "batterij_w": { "type": "array", "items": { "type": "number" }, "description": "Per kwartier: plus = de batterij leverde, min = hij laadde." },
+        "net_w": { "type": "array", "items": { "type": "number" }, "description": "Per kwartier: plus = afgenomen, min = teruggeleverd." },
+        "procent": { "type": "array", "items": { "type": "number" }, "description": "Per kwartier: hoe vol de batterij was, 0 tot 100." },
+        "kwh": {
+          "type": "object",
+          "description": "Vandaag tot nu, vermogen × tijd.",
+          "properties": {
+            "zon": { "type": "number", "description": "Opgewekt door de panelen." },
+            "huis": { "type": "number", "description": "Gebruikt door het huis." },
+            "geladen": { "type": "number", "description": "In de batterij geladen." },
+            "ontladen": { "type": "number", "description": "Uit de batterij gekomen." }
+          }
+        },
+        "fasen": {
+          "type": "array",
+          "description": "Per fase van de P1-meter: per kwartier de gemiddelde stroom (A) en het vermogen (W), en over de dag gemiddelde en piek.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fase": { "type": "number", "description": "1, 2 of 3." },
+              "a": { "type": "array", "items": { "type": "number" }, "description": "Per kwartier de gemiddelde stroom in ampère." },
+              "w": { "type": "array", "items": { "type": "number" }, "description": "Per kwartier het gemiddelde vermogen in watt (min = terugleveren)." },
+              "gemiddeld_a": { "type": "number", "description": "Gemiddelde stroom vandaag." },
+              "piek_a": { "type": "number", "description": "Hoogste stroom vandaag." }
+            }
+          }
+        },
+        "zonnen": {
+          "type": "array",
+          "description": "Per plek met panelen (programmaatje 0.10.0, alleen bij twee of meer plekken, hooguit 6): per kwartier wat die plek gemiddeld leverde, in watt. Zo leert het tabblad Voorspelling per plek. Leeg = één plek (dan is het zon_w), of een oudere versie.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sleutel": { "type": "string", "description": "De sleutel van de zonnebron (zonnen[].sleutel), bijvoorbeeld 'hw-zon-huis'." },
+              "w": { "type": "array", "items": { "type": "number" }, "description": "Per kwartier het gemiddelde vermogen in watt (0 = geen meting of geen zon)." }
+            }
+          }
+        },
+        "week": {
+          "type": "array",
+          "description": "De daggemiddelden per fase van de laatste 7 dagen (zonder vandaag).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "datum": { "type": "string", "description": "De dag." },
+              "fasen": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "fase": { "type": "number", "description": "1, 2 of 3." },
+                    "gemiddeld_a": { "type": "number", "description": "Gemiddelde stroom die dag." },
+                    "piek_a": { "type": "number", "description": "Hoogste stroom die dag." }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "apparaten": {
+          "type": "array",
+          "description": "Per apparaat van vandaag hoeveel kWh en hoe vaak aan (programmaatje 0.12.0), hooguit 30, meeste kWh eerst. Gaat ook in Dag.apparaten_kwh. Leeg = een oudere versie.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sleutel": { "type": "string", "description": "Van de meter (zoals 'hw-spa'), of bij een herkend apparaat 'h:soort' of 'h:soort:naam'." },
+              "soort": { "type": "string", "description": "De soort van een herkend apparaat." },
+              "naam": { "type": "string", "description": "Een eigen naam, of de naam van de meter." },
+              "kwh": { "type": "number", "description": "kWh vandaag tot nu." },
+              "keer": { "type": "number", "description": "Hoe vaak aan vandaag." },
+              "gemeten": { "type": "boolean", "description": "Waar = een eigen meter (precies), onwaar = herkend (een schatting)." }
+            }
+          }
+        },
+        "basis_kwh": { "type": "number", "description": "Wat de basis vandaag tot nu gebruikte, in kWh (0.12.0): altijd-aan en een kruipende warmtepomp." }
+      }
+    },
+    "gekoppeld": {
+      "type": "array",
+      "description": "Wat er aan het programmaatje gekoppeld is, voor de lijst in de app. Geen codes, sleutels of serienummers.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sleutel": { "type": "string", "description": "Vaste naam, bijvoorbeeld 'hw-meterkast' of 'zendure'." },
+          "naam": { "type": "string", "description": "Hoe het heet, bijvoorbeeld 'Meterkast'." },
+          "merk": { "type": "string", "description": "HomeWizard, Zendure of GoodWe." },
+          "soort": { "type": "string", "description": "Bijvoorbeeld 'P1-meter', 'kWh-meter' of 'SolarFlow 2400 AC'." },
+          "rol": { "type": "string", "description": "net, zon, zon-en-batterij, apparaat, batterij, vergelijk (de tweede P1-meter) of omvormer." },
+          "manier": { "type": "string", "description": "v1 of v2 (HomeWizard), lokaal, cloud of cloud-reserve (Zendure: lokaal ingesteld, nu via de cloud omdat hij lokaal niet antwoordt), lokaal (GoodWe)." },
+          "adres": { "type": "string", "description": "Het adres in het eigen netwerk; leeg bij de cloud." },
+          "ok": { "type": "boolean", "description": "Antwoordde het de laatste keer?" },
+          "sinds": { "type": "string", "format": "date-time", "description": "Sinds wanneer het niet antwoordt; leeg als het wel antwoordt." },
+          "w": { "type": "number", "description": "Wat het nu meet, in watt." }
+        }
+      }
+    },
+    "brug": {
+      "type": "object",
+      "description": "Het programmaatje thuis zelf.",
+      "properties": {
+        "versie": { "type": "string", "description": "Bijvoorbeeld '0.4.0'." },
+        "gestart": { "type": "string", "format": "date-time", "description": "Sinds wanneer het draait." },
+        "elke_seconden": { "type": "number", "description": "Hoe vaak het meet en stuurt." },
+        "prijzen": { "type": "string", "description": "Waar de prijzen nu vandaan komen; leeg = geen prijzen." },
+        "meldingen": {
+          "type": "array",
+          "description": "Wat er mis is volgens het programmaatje (0.5.2 en nieuwer), in gewone woorden, voor bovenaan Apparaten. Leeg = niets.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "soort": { "type": "string", "description": "Waar het over gaat: 'opslag', 'prijzen', 'apparaat', 'bedragen'." },
+              "tekst": { "type": "string", "description": "De melding, met de opdracht erbij als die er is; hooguit 160 tekens, geen adressen." },
+              "sinds": { "type": "string", "format": "date-time", "description": "Sinds wanneer; leeg als dat er niet toe doet." }
+            }
+          }
+        },
+        "publiek": {
+          "type": "string",
+          "description": "Het publieke deel van het sleutelpaar van het programmaatje (0.7.0 en nieuwer; RSA 2048, SPKI in base64). Daarmee versleutelt de app wat op afstand wordt ingesteld. Geen geheim. Leeg = een oudere versie."
+        },
+        "zon": {
+          "type": "object",
+          "description": "Zon op en onder van vandaag op de plaats van het huis (programmaatje 0.7.0 en nieuwer). Daarop schakelt de tekening tussen dag en nacht; leeg = een oudere versie (dan op het licht: levert de zon iets).",
+          "properties": {
+            "op": { "type": "string", "format": "date-time", "description": "Zonsopkomst." },
+            "onder": { "type": "string", "format": "date-time", "description": "Zonsondergang." }
+          }
+        },
+        "op_afstand": {
+          "type": "array",
+          "description": "Wat het programmaatje op afstand heeft opgepakt (0.7.0 en nieuwer): per veld het moment van het laatste stuk, en of overnemen lukte. Nooit de waarde.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "veld": { "type": "string", "description": "Bijvoorbeeld 'zendure.cloudsleutel'." },
+              "op": { "type": "string", "format": "date-time", "description": "Het moment waarop dat stuk in de app klaargezet was (Huis.op_afstand[].op)." },
+              "ok": { "type": "boolean", "description": "Waar als het programmaatje het heeft overgenomen." },
+              "fout": { "type": "string", "description": "Waarom niet: 'sleutelpaar' (voor een ander sleutelpaar), 'ongeldig', 'geen-zendure' of 'bewaren'." }
+            }
+          }
+        },
+        "herkent": { "type": "boolean", "description": "Waar als het programmaatje apparaten herkent en labels aanneemt (0.11.0 en nieuwer)." },
+        "labels_op": { "type": "string", "format": "date-time", "description": "Het moment van het nieuwste label dat het programmaatje al heeft; ontvangMeting geeft alleen nieuwere terug." }
+      }
+    },
+    "herkend": {
+      "type": "object",
+      "description": "Welk apparaat er nu stroom gebruikt, geraden door het programmaatje (0.11.0, brug/herkennen.mjs) uit het huisverbruik (zon + batterij + net, min wat een eigen meter heeft). Gaat mee als het verandert en eens per minuut; leeg = een oudere versie. Alleen kijken: de app bedient niets.",
+      "properties": {
+        "moment": { "type": "string", "format": "date-time", "description": "Wanneer Base44 dit blok ontving; ouder dan een paar minuten = niet meer van nu." },
+        "nu": {
+          "type": "array",
+          "description": "Wat er nu waarschijnlijk aan staat, grootste eerst, hooguit 10.",
+          "items": {
+            "type": "object",
+            "properties": {
+                "id": { "type": "string", "description": "Vast kenmerk van deze gebeurtenis (kleine letters, cijfers, streepje); daarmee labelt de app hem." },
+                "soort": { "type": "string", "description": "Wat het waarschijnlijk is: koelkast, vriezer, wasmachine, vaatwasser, droger, strijkijzer, stofzuiger, waterkoker, oven, airfryer, magnetron, kookplaat, fohn, spa, boiler, pomp, warmtepomp, auto of anders. Leeg = onbekend." },
+                "naam": { "type": "string", "description": "Een eigen naam die de gebruiker gaf (bij 'anders'), hooguit 40 tekens." },
+                "deel": { "type": "string", "description": "Welk deel: 'verwarmt', 'trommel' of 'centrifuge' (bij een wasmachine)." },
+                "w": { "type": "number", "description": "Hoeveel het gebruikt(e), in watt (op 10 W)." },
+                "zeker": { "type": "number", "description": "Hoe zeker, 0 tot 1: vanaf 0,85 zeker, 0,6 waarschijnlijk, 0,35 misschien." },
+                "fase": { "type": "number", "description": "Op welke fase het begon (1, 2 of 3), als de P1 dat liet zien; alleen een aanwijzing." },
+                "vorm": { "type": "string", "description": "'puls' (steeds even aan, zoals een strijkijzer) of 'cyclus' (minuten aan en uit, zoals een oven)." },
+                "bevestigd": { "type": "boolean", "description": "Waar als de gebruiker het zo aanwees." },
+                "onbekend": { "type": "string", "description": "De letter van de groep onbekenden waar het op lijkt ('A'), zie onbekend." },
+                "sinds": { "type": "string", "format": "date-time", "description": "Sinds wanneer het aan staat (klok van het programmaatje)." }
+            }
+          }
+        },
+        "recent": {
+          "type": "array",
+          "description": "Wat er eerder aan stond (de laatste 24 uur), nieuwste eerst, hooguit 20.",
+          "items": {
+            "type": "object",
+            "properties": {
+                "id": { "type": "string", "description": "Vast kenmerk van deze gebeurtenis (kleine letters, cijfers, streepje); daarmee labelt de app hem." },
+                "soort": { "type": "string", "description": "Wat het waarschijnlijk is: koelkast, vriezer, wasmachine, vaatwasser, droger, strijkijzer, stofzuiger, waterkoker, oven, airfryer, magnetron, kookplaat, fohn, spa, boiler, pomp, warmtepomp, auto of anders. Leeg = onbekend." },
+                "naam": { "type": "string", "description": "Een eigen naam die de gebruiker gaf (bij 'anders'), hooguit 40 tekens." },
+                "deel": { "type": "string", "description": "Welk deel: 'verwarmt', 'trommel' of 'centrifuge' (bij een wasmachine)." },
+                "w": { "type": "number", "description": "Hoeveel het gebruikt(e), in watt (op 10 W)." },
+                "zeker": { "type": "number", "description": "Hoe zeker, 0 tot 1: vanaf 0,85 zeker, 0,6 waarschijnlijk, 0,35 misschien." },
+                "fase": { "type": "number", "description": "Op welke fase het begon (1, 2 of 3), als de P1 dat liet zien; alleen een aanwijzing." },
+                "vorm": { "type": "string", "description": "'puls' (steeds even aan, zoals een strijkijzer) of 'cyclus' (minuten aan en uit, zoals een oven)." },
+                "bevestigd": { "type": "boolean", "description": "Waar als de gebruiker het zo aanwees." },
+                "onbekend": { "type": "string", "description": "De letter van de groep onbekenden waar het op lijkt ('A'), zie onbekend." },
+                "van": { "type": "string", "format": "date-time", "description": "Wanneer het aanging." },
+                "tot": { "type": "string", "format": "date-time", "description": "Wanneer het uitging." }
+            }
+          }
+        },
+        "onbekend": {
+          "type": "array",
+          "description": "Terugkerende stappen die nog niemand kent (minstens drie keer gezien), hooguit 5. De app vraagt wat het is; één label benoemt de hele groep.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Vast kenmerk van de groep; een label met dit id geldt voor alle leden." },
+              "letter": { "type": "string", "description": "Hoe de app hem noemt: 'Onbekend apparaat A'." },
+              "w": { "type": "number", "description": "Zo'n vermogen, in watt." },
+              "duur_s": { "type": "number", "description": "Zo lang aan, in seconden." },
+              "n": { "type": "number", "description": "Hoe vaak gezien." },
+              "fase": { "type": "number", "description": "Meestal op deze fase (1, 2 of 3)." },
+              "dagdeel": { "type": "string", "description": "Meestal 's nachts, 's ochtends, 's middags of 's avonds: 'nacht', 'ochtend', 'middag', 'avond'." },
+              "dag": { "type": "number", "description": "Meestal op deze dag: 0 = maandag … 6 = zondag." },
+              "vermoeden": { "type": "string", "description": "Wat het programmaatje vermoedt (een soort), als het zelf twijfelt." },
+              "vorm": { "type": "string", "description": "De handtekening (1.4.0): 'puls', 'cyclus', 'traag' (loopt langzaam aan), 'piek' (korte piek bij het aangaan), 'golf' (onrustig) of 'vlak' (rustig blok)." },
+              "tijden": { "type": "array", "items": { "type": "string", "format": "date-time" }, "description": "Wanneer het de laatste keren begon (hooguit 4, oudste eerst; 1.4.0). Niet voor kijkers." },
+              "vandaag": { "type": "number", "description": "Hoe vaak vandaag (1.4.0)." },
+              "per_dag": { "type": "number", "description": "Hoe vaak per dag dat hij er was, gemiddeld (1.4.0)." },
+              "later": { "type": "boolean", "description": "Alleen in de stand voor de eigenaar: hij zei 'Weet ik niet' of 'Later'; een week niet vragen. Niet bewaard." }
+            }
+          }
+        },
+        "kennis": {
+          "type": "object",
+          "description": "Wat het programmaatje kent (1.4.0): voor de regel 'Ik ken nu 4 apparaten van je'.",
+          "properties": {
+            "apparaten": {
+              "type": "array",
+              "description": "Hooguit 12: eerst wat de eigenaar aanwees, dan wat het zelf herkende.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "soort": { "type": "string", "description": "De soort, zoals bij nu." },
+                  "naam": { "type": "string", "description": "Een eigen naam, hooguit 40 tekens." },
+                  "zeker": { "type": "number", "description": "Hoe zeker, 0 tot 1." },
+                  "aangewezen": { "type": "number", "description": "Hoe vaak de eigenaar het aanwees; leeg = uit zichzelf herkend." },
+                  "basis": { "type": "boolean", "description": "Waar bij een warmtepomp die in de basis meeloopt." }
+                }
+              }
+            }
+          }
+        },
+        "basis": {
+          "type": "object",
+          "description": "Wat er altijd is: de langzaam wisselende basis.",
+          "properties": {
+            "w": { "type": "number", "description": "De basis nu, in watt (op 25 W): altijd-aan plus een warmtepomp als die er is." },
+            "altijd_w": { "type": "number", "description": "Het laagste stabiele niveau van de nachten (per huis geleerd), in watt." },
+            "warmtepomp": { "type": "boolean", "description": "Waar als het patroon op een warmtepomp wijst (langzaam en flink wisselend op een hoog niveau)." }
+          }
+        },
+        "week": {
+          "type": "object",
+          "description": "Deze week per apparaat hoe vaak en hoeveel kWh, ook wat een eigen meter heeft.",
+          "properties": {
+            "van": { "type": "string", "description": "De maandag van deze week (JJJJ-MM-DD, Nederlandse tijd)." },
+            "apparaten": {
+              "type": "array",
+              "description": "Hooguit 16, meeste kWh eerst.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "soort": { "type": "string", "description": "De soort (herkend), zoals bij nu." },
+                  "sleutel": { "type": "string", "description": "De sleutel van een apparaat met een eigen meter (zoals 'hw-spa')." },
+                  "naam": { "type": "string", "description": "Een eigen naam, of de naam van de meter." },
+                  "keer": { "type": "number", "description": "Hoe vaak aan deze week." },
+                  "kwh": { "type": "number", "description": "Hoeveel kWh deze week (op 0,1)." },
+                  "dagdeel": { "type": "string", "description": "Wanneer meestal: 'nacht', 'ochtend', 'middag', 'avond'." },
+                  "dag": { "type": "number", "description": "Op welke dag meestal: 0 = maandag … 6 = zondag." }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "kennis": {
+      "type": "object",
+      "description": "Intern, alleen voor de beheerder (actie overzicht; gaat niet met de stand naar de site): wat elk apparaat teruggeeft, hooguit eens per dag per apparaat (programmaatje 1.4.0). Alleen veldnamen, met een getal als dat niets herkenbaars is; nooit serienummers, adressen, wifinamen, sleutels of tokens.",
+      "properties": {
+        "op": { "type": "string", "format": "date-time", "description": "Wanneer deze lijst binnenkwam (klok van Base44)." },
+        "apparaten": {
+          "type": "array",
+          "description": "Per apparaat, hooguit 12.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sleutel": { "type": "string", "description": "Welk apparaat: de sleutel van de meter, 'zendure' of 'goodwe'." },
+              "soort": { "type": "string", "description": "Bijvoorbeeld 'HomeWizard P1-meter (v2)', 'SolarFlow 2400 AC', 'GoodWe GW8K-DT'." },
+              "datum": { "type": "string", "description": "Van welke dag de lijst is." },
+              "velden": { "type": "array", "items": { "type": "string" }, "description": "Per veld 'naam' of 'naam=getal', bijvoorbeeld 'active_tariff=2' of 'r30140=9850' (een register van de omvormer)." }
+            }
+          }
+        }
+      }
+    },
+    "spanning": {
+      "type": "object",
+      "description": "De spanningswacht (programmaatje 1.5.0, brug/spanning.mjs, alleen lezen), eens per minuut: de netspanning per fase uit de beste bron, de hoogste van vandaag, hoe vaak het boven 250 V kwam, uitval bij hoge spanning en de lijst voor de netbeheerder. Leeg = een oudere versie.",
+      "properties": {
+        "datum": { "type": "string", "description": "De dag (Nederlandse datum)." },
+        "herkomst": {
+          "type": "array",
+          "description": "Waar elke spanning vandaan komt. Leeg = deze meterkast geeft geen spanning door.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sleutel": { "type": "string", "description": "L1, L2, L3, of zon (de fase van een eenfase kWh-meter op de zon; welke fase dat is weet het programmaatje niet)." },
+              "bron": { "type": "string", "description": "omvormer, p1, meter (een driefase kWh-meter in huis) of zon (een kWh-meter op de zon)." },
+              "naam": { "type": "string", "description": "De naam van de meter uit de instellingen thuis." }
+            }
+          }
+        },
+        "nu": {
+          "type": "array",
+          "description": "Nu per sleutel: de laatste spanning en het 10-minutengemiddelde.",
+          "items": { "type": "object", "properties": { "sleutel": { "type": "string", "description": "L1, L2, L3 of zon." }, "v": { "type": "number", "description": "Volt." }, "gem10": { "type": "number", "description": "10 minuten gemiddeld, volt." } } }
+        },
+        "hoogste": {
+          "type": "array",
+          "description": "De hoogste spanning van vandaag per sleutel.",
+          "items": { "type": "object", "properties": { "sleutel": { "type": "string", "description": "L1, L2, L3 of zon." }, "v": { "type": "number", "description": "Volt." }, "op": { "type": "string", "format": "date-time", "description": "Wanneer." } } }
+        },
+        "verschil": {
+          "type": "array",
+          "description": "Het grootste verschil vandaag tussen de zonmeter en elke fase van de driefase meter (zon min fase, volt).",
+          "items": { "type": "object", "properties": { "sleutel": { "type": "string", "description": "L1, L2 of L3." }, "v": { "type": "number", "description": "Volt." }, "op": { "type": "string", "format": "date-time", "description": "Wanneer." } } }
+        },
+        "verschil_met": { "type": "string", "description": "Programmaatje 1.6.0, twee driefase meters (bijvoorbeeld zon en spa): de naam van de meter waarmee de zonmeter per fase vergeleken is (L1 zon − L1 die meter, enz.)." },
+        "uitval_vandaag": { "type": "number", "description": "Hoe vaak de omvormer vandaag uitviel bij een hoge spanning." },
+        "boven_250_vandaag": { "type": "number", "description": "Hoe vaak een fase vandaag boven 250 V kwam." },
+        "boven_250_uitgevallen": { "type": "number", "description": "Hoe vaak hij daarbij ook uitviel." },
+        "maand": { "type": "string", "description": "De maand ('2026-07')." },
+        "uitval_maand": { "type": "number", "description": "Hoe vaak deze maand." },
+        "lijst": {
+          "type": "array",
+          "description": "De laatste 30 keer uitval bij hoge spanning, voor de netbeheerder.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "op": { "type": "string", "format": "date-time", "description": "Wanneer." },
+              "sleutel": { "type": "string", "description": "L1, L2, L3 of zon." },
+              "v": { "type": "number", "description": "De hoogste spanning in de minuten ervoor, volt." },
+              "gem": { "type": "number", "description": "Het 10-minutengemiddelde, volt." },
+              "omvormer": { "type": "boolean", "description": "Waar = de omvormer meldde zelf een netspanningsfout." }
+            }
+          }
+        }
+      }
+    },
+    "storingen_open": {
+      "type": "array",
+      "description": "Intern voor ontvangMeting (gaat niet naar de site): welke storingen van dit huis nu openstaan in het logboek (tabel Gebeurtenis), zodat er alleen bij het begin en het einde geschreven wordt, ook na een herstart van de functie. Leeg = niets open.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "De rij in Gebeurtenis." },
+          "sleutel": { "type": "string", "description": "Wat er mis is, bijvoorbeeld 'batterij', 'omvormer:13', 'meter:hw-p1' of 'melding:prijzen:…'." },
+          "soort": { "type": "string", "description": "batterij, omvormer, meter of melding." },
+          "wat": { "type": "string", "description": "In gewone woorden, zoals in Gebeurtenis.wat." },
+          "begin": { "type": "string", "format": "date-time", "description": "Wanneer het begon (klok van Base44)." },
+          "gezien": { "type": "string", "format": "date-time", "description": "De laatste meting waarin het nog speelde." },
+          "weg": { "type": "string", "format": "date-time", "description": "De eerste meting waarin het weg was; na twee minuten weg is het voorbij. Leeg = speelt nog." }
+        }
+      }
+    }
+  },
+  // Niemand leest of schrijft dit rechtstreeks. Schrijven doet alleen
+  // ontvangMeting, lezen de functie huis voor wie lid is van dat huis; beide
+  // met de rol van de server (base44/shared/toegang.js).
+  "rls": {
+    "create": { "user_condition": { "role": "admin" } },
+    "read": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}

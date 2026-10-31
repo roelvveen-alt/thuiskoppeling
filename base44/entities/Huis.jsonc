@@ -1,0 +1,98 @@
+{
+  "name": "Huis",
+  "type": "object",
+  "description": "Een omgeving: één huis met zijn eigen meters, indeling en mensen. Alleen de functies huis en ontvangMeting lezen en schrijven dit, met de rol van de server; wie wat mag staat in base44/shared/toegang.js. De site leest het nooit zelf.",
+  "properties": {
+    "naam": {
+      "type": "string",
+      "description": "Hoe de omgeving in de app heet, bijvoorbeeld 'Thuis' of 'Vakantiehuis'. Hooguit 40 tekens."
+    },
+    "eigenaar_id": {
+      "type": "string",
+      "description": "Id van de gebruiker die de omgeving maakte. Alleen die mag indelen, namen geven, delen en de sleutel vervangen. Zelf ingevuld door de functie: met de rol van de server is het serveraccount de maker."
+    },
+    "eigenaar_email": {
+      "type": "string",
+      "description": "E-mailadres van de eigenaar, in kleine letters. Om te laten zien bij wie je meekijkt."
+    },
+    "leden": {
+      "type": "array",
+      "description": "Wie mag meekijken (alleen kijken), op e-mailadres in kleine letters. Hooguit 20.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "description": "E-mailadres, in kleine letters." }
+        }
+      }
+    },
+    "brug_sleutel_hash": {
+      "type": "string",
+      "description": "SHA-256 (hex) van de sleutel van het programmaatje thuis. De sleutel zelf bewaart Base44 niet; de eigenaar ziet hem één keer in de app."
+    },
+    "op_afstand": {
+      "type": "array",
+      "description": "Wat de eigenaar op afstand klaarzette voor het programmaatje thuis (programmaatje 0.7.0), per veld hooguit één: nu alleen 'zendure.cloudsleutel'. Versleuteld in de browser met het publieke deel van het programmaatje; Base44 kan het niet lezen. Zie base44/shared/opAfstand.js.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "veld": { "type": "string", "description": "Wat het is, bijvoorbeeld 'zendure.cloudsleutel'." },
+          "op": { "type": "string", "format": "date-time", "description": "Wanneer het klaargezet is (de klok van de server)." },
+          "v": { "type": "number", "description": "De manier van versleutelen: 1 = RSA-OAEP-2048 (SHA-256) om AES-256-GCM." },
+          "voor": { "type": "string", "description": "Vingerafdruk (32 tekens hex) van het publieke deel waarmee het versleuteld is." },
+          "sleutel": { "type": "string", "description": "De AES-sleutel, ingepakt met RSA-OAEP, in base64." },
+          "iv": { "type": "string", "description": "De iv van AES-GCM (12 bytes), in base64." },
+          "data": { "type": "string", "description": "De versleutelde waarde (AES-GCM, met de controle erachter), in base64." }
+        }
+      }
+    },
+    "brug_publiek_vast": {
+      "type": "string",
+      "description": "Vingerafdruk (32 tekens hex) van het publieke deel van het programmaatje dat de eigenaar vertrouwt: vastgezet de eerste keer dat hij iets op afstand klaarzet, en alleen anders na zijn bevestiging in de app (vergelijken met node brug.mjs proef). Op afstand klaarzetten kan alleen voor dit sleutelpaar; ontvangMeting geeft het alleen aan een programmaatje met dit sleutelpaar. Leeg: nog nooit iets klaargezet. Zie base44/shared/opAfstand.js."
+    },
+    "brug_publiek_vast_op": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Wanneer brug_publiek_vast is vastgezet of door de eigenaar bevestigd (de klok van de server)."
+    },
+    "herkend_labels": {
+      "type": "array",
+      "description": "Wat de eigenaar aanwees bij het herkennen van apparaten (programmaatje 0.11.0): 'Klopt' of 'Dat was …', per gebeurtenis of per groep onbekenden. Hooguit 100, de nieuwste. ontvangMeting geeft ze terug aan het programmaatje van dit huis, dat er zijn handtekeningen mee bijwerkt. Zie base44/shared/herkennen.js.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "De gebeurtenis (Meting.herkend.recent[].id of nu[].id) of de groep onbekenden (onbekend[].id)." },
+          "soort": { "type": "string", "description": "Wat het was (zie Meting.herkend.nu[].soort); 'anders' met een naam." },
+          "naam": { "type": "string", "description": "Een eigen naam, hooguit 40 tekens." },
+          "w": { "type": "number", "description": "Het vermogen van de gebeurtenis, in watt." },
+          "duur_s": { "type": "number", "description": "Hoe lang hij aan stond, in seconden; leeg als hij nog aan stond." },
+          "fase": { "type": "number", "description": "Op welke fase (1, 2 of 3), als bekend." },
+          "vorm": { "type": "string", "description": "'puls' of 'cyclus', als zo herkend; bij een groep sinds 1.4.0 ook 'traag', 'piek', 'golf' of 'vlak'." },
+          "was": { "type": "string", "description": "Wat het programmaatje zei; gelijk aan soort = 'Klopt'." },
+          "aantal": { "type": "number", "description": "Bij een groep onbekenden: voor zoveel keer." },
+          "op": { "type": "string", "format": "date-time", "description": "Wanneer gelabeld (klok van de server)." },
+          "later": { "type": "boolean", "description": "Waar bij 'Weet ik niet' of 'Later' op een vraag (1.4.0): alleen id en op; de app vraagt een week niet naar die groep. Gaat niet naar het programmaatje." }
+        }
+      }
+    },
+    "omvormer_sturen": {
+      "type": "object",
+      "description": "De omvormer begrenzen als terugleveren geld kost (programmaatje 1.5.0, alleen een GoodWe): de instelling van de eigenaar (Instellingen › Omvormer, actie omvormerSturen; alleen de eigenaar schrijft het). Het programmaatje krijgt het terug van ontvangMeting en beslist zelf; de app bedient niets. Leeg = uit. Zie base44/shared/omvormerSturen.js.",
+      "properties": {
+        "aan": { "type": "boolean", "description": "Waar = het programmaatje mag de omvormer begrenzen. Standaard uit." },
+        "niet_op": { "type": "array", "description": "Dagen (Nederlandse datum, '2026-11-01') waarop het niet mag ('Morgen niet'); hooguit 14, voorbije dagen vallen weg.", "items": { "type": "string" } },
+        "vrij_op": { "type": "string", "format": "date-time", "description": "Wanneer de eigenaar 'Nu weer aan' koos: het programmaatje geeft hem vrij en begrenst de rest van dat blok niet meer." },
+        "netto": { "type": "string", "description": "'afnemer' (standaard: over het jaar meer afnemen dan terugleveren, dus saldering tot 2027) of 'terugleveraar'." },
+        "op": { "type": "string", "format": "date-time", "description": "Wanneer de eigenaar dit het laatst veranderde (de klok van de server)." }
+      }
+    }
+  },
+  // Niemand leest of schrijft dit rechtstreeks: de regel "lid van dit huis"
+  // past niet in user_condition. De functies doen het met de rol van de
+  // server en toetsen zelf (base44/shared/toegang.js).
+  "rls": {
+    "create": { "user_condition": { "role": "admin" } },
+    "read": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}

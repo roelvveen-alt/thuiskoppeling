@@ -1,0 +1,1013 @@
+@import "tailwindcss";
+
+/*
+ * De lettertypes, van de site zelf (public/fonts, SIL Open Font License, zie
+ * OFL-*.txt daar): alleen de Latijnse tekens, zoals Google ze ook levert.
+ * Bricolage voor de koppen, Instrument Sans voor de tekst én de cijfers
+ * (met tabulaire cijfers, zodat ze niet verspringen als ze veranderen).
+ */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 600 800;
+  font-display: swap;
+  src: url("/fonts/bricolage-grotesque-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/instrument-sans-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/*
+ * Opzet: één nachtblauw scherm. De foto van het huis is het instrument, met de
+ * stroom erop; daaronder vier gewone zinnen (zon, batterij, net, huis) en de
+ * apparaten. Donker is de standaard, licht moet ook goed leesbaar zijn.
+ *
+ * Twee soorten kleuren:
+ *   --zon, --net, …       op de achtergrond van het scherm; wisselen mee met licht/donker
+ *   --foto-zon, …         op de foto (lijnen, rondjes); altijd dezelfde, want de foto
+ *                         en de donkere naamkaartjes erop wisselen niet mee
+ *   --statusbalk          de strook onder de statusbalk van een iPhone (beginscherm);
+ *                         altijd donker, want iOS tekent de klok daar wit
+ */
+:root {
+  color-scheme: dark;
+  --statusbalk: #081421;
+  --grond: #081421;
+  --vlak: #0e2033;
+  --vlak-hoog: #16304a;
+  --lijn: #213d5a;
+  --tekst: #e9f1f8;
+  --tekst-zacht: #9db2c7;
+  --zon: #f6b93b;
+  --batterij: #4fd6a6;
+  --net: #6cb4ff;
+  --huis: #efe7da;
+  --apparaat: #c3a6ff;
+  --let-op: #ffb454;
+  --fout: #ff8a80;
+  --goed: #4fd6a6;
+  /* De drie fasen (L1, L2, L3): gecontroleerd op kleurenblindheid en contrast (dataviz-skill). */
+  --fase-1: #3987e5;
+  --fase-2: #d95926;
+  --fase-3: #9085e9;
+
+  --foto-zon: #ffc247;
+  --foto-batterij: #55e0b0;
+  --foto-net: #79bcff;
+  --foto-huis: #f6efe3;
+  --foto-apparaat: #cdb4ff;
+  /* De ring om een rondje: oranje als de batterij levert, en het spoor eronder. */
+  --foto-let-op: #ff9b42;
+  --foto-ring-spoor: rgb(8 20 33 / 0.6);
+  --foto-kaartje: rgb(8 20 33 / 0.84);
+  --foto-kaartje-tekst: #f3f7fb;
+  --foto-kaartje-zacht: #b9c8d8;
+  /* Achter de foto, de rondjes, de donkere rand onder een lijn, een stil rondje en de schaduw boven en onder. */
+  --foto-grond: #0b1e33;
+  --foto-rond: rgb(8 20 33 / 0.86);
+  --foto-lijn-onder: rgb(8 20 33 / 0.42);
+  --foto-stil: #8fa3b8;
+  --foto-schaduw-boven: rgb(8 20 33 / 0.28);
+  --foto-schaduw-onder: rgb(8 20 33 / 0.38);
+  /* Achter een open blad. */
+  --verduister: rgb(4 10 18 / 0.55);
+  /* Vlakken in een grafiek (de beste twee uur, toen de batterij laadde): gekleurd en grijs. */
+  --band-kleur: 0.16;
+  --band-grijs: 0.07;
+
+  --font-kop: "Bricolage Grotesque", "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-tekst: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Cijfers in de tekstletter met tabulaire cijfers (.cijfer): een monospace maakte er "2 , 8 kW" van. */
+  --font-cijfer: var(--font-tekst);
+  /* Alleen voor code (opdrachten, de sleutel, een IP-adres): de monospace van het toestel zelf. */
+  --font-code: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --grond: #eef3f8;
+    --vlak: #ffffff;
+    --vlak-hoog: #e2eaf3;
+    --lijn: #c8d5e2;
+    --tekst: #0b1b2b;
+    --tekst-zacht: #4a5e72;
+    --zon: #9a6200;
+    --batterij: #08805b;
+    --net: #1d66b8;
+    --huis: #5a4a36;
+    --apparaat: #6644c4;
+    --let-op: #9a5300;
+    --fout: #b3261e;
+    --goed: #08805b;
+    --fase-1: #2a78d6;
+    --fase-2: #eb6834;
+    --fase-3: #6250d6;
+    --band-kleur: 0.26;
+    --band-grijs: 0.09;
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --grond: #eef3f8;
+  --vlak: #ffffff;
+  --vlak-hoog: #e2eaf3;
+  --lijn: #c8d5e2;
+  --tekst: #0b1b2b;
+  --tekst-zacht: #4a5e72;
+  --zon: #9a6200;
+  --batterij: #08805b;
+  --net: #1d66b8;
+  --huis: #5a4a36;
+  --apparaat: #6644c4;
+  --let-op: #9a5300;
+  --fout: #b3261e;
+  --goed: #08805b;
+  --fase-1: #2a78d6;
+  --fase-2: #eb6834;
+  --fase-3: #6250d6;
+  --band-kleur: 0.26;
+  --band-grijs: 0.09;
+}
+
+@theme inline {
+  --color-grond: var(--grond);
+  --color-vlak: var(--vlak);
+  --color-vlak-hoog: var(--vlak-hoog);
+  --color-lijn: var(--lijn);
+  --color-tekst: var(--tekst);
+  --color-tekst-zacht: var(--tekst-zacht);
+  --color-zon: var(--zon);
+  --color-batterij: var(--batterij);
+  --color-net: var(--net);
+  --color-huis: var(--huis);
+  --color-apparaat: var(--apparaat);
+  --color-let-op: var(--let-op);
+  --color-fout: var(--fout);
+  --color-goed: var(--goed);
+  --font-kop: var(--font-kop);
+  --font-tekst: var(--font-tekst);
+  --font-cijfer: var(--font-cijfer);
+  --font-code: var(--font-code);
+}
+
+html,
+body {
+  background: var(--grond);
+  color: var(--tekst);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-tekst);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* De strook onder de statusbalk van een iPhone (vanaf het beginscherm: black-translucent).
+   Ook in licht thema donker: iOS tekent de klok en de batterij daar wit. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--statusbalk);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-kop);
+  text-wrap: balance;
+  margin: 0;
+}
+
+.cijfer {
+  font-family: var(--font-cijfer);
+  font-variant-numeric: tabular-nums;
+}
+.code {
+  font-family: var(--font-code);
+}
+
+.schil {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  /* Bovenaan ook de statusbalk erbij, anders valt de kop (met het tandwiel) eronder. */
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  padding-bottom: 40px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--tekst);
+  outline-offset: 2px;
+}
+
+/* Knoppen: minstens 44 px hoog, één soort rand, één soort gekozen. */
+.knop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--lijn);
+  background: var(--vlak);
+  color: var(--tekst);
+  font: 600 14px/1 var(--font-tekst);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.knop:hover {
+  background: var(--vlak-hoog);
+}
+/* Een brede knop die ergens heen gaat: tekst links, pijltje rechts, en mag over twee regels (320 px). */
+.knop-breed {
+  width: 100%;
+  justify-content: space-between;
+  padding: 8px 14px 8px 16px;
+  text-align: left;
+  white-space: normal;
+  line-height: 1.3;
+}
+.knop-hoofd {
+  background: var(--tekst);
+  border-color: var(--tekst);
+  color: var(--grond);
+}
+.knop-hoofd:hover {
+  background: var(--tekst);
+  opacity: 0.92;
+}
+.keuze {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--lijn);
+  background: transparent;
+  color: var(--tekst-zacht);
+  font: 600 13.5px/1 var(--font-tekst);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.keuze[aria-checked="true"] {
+  background: var(--tekst);
+  border-color: var(--tekst);
+  color: var(--grond);
+}
+
+.knop:disabled,
+.keuze:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/*
+ * Segmenten: een rij keuzes die samen één ding kiezen (Overzicht: Vandaag,
+ * Week, Maand, Kwartaal, Jaar). Eén vlak met de keuzes erin, zo smal dat ze
+ * ook op 320 px naast elkaar passen; gekozen = dezelfde stijl als .keuze.
+ */
+.segmenten {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--lijn);
+  border-radius: 999px;
+  background: var(--vlak);
+}
+.segmenten .keuze {
+  /* Naar de tekst, en nooit smaller dan een vinger: alle vijf passen heel op 288 px (320 px breed). */
+  flex: 1 1 auto;
+  min-width: 44px;
+  padding: 0 4px;
+  border-color: transparent;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.segmenten .keuze:hover {
+  color: var(--tekst);
+}
+.segmenten .keuze[aria-checked="true"] {
+  border-color: var(--tekst);
+  color: var(--grond);
+}
+
+/* Invoer: even hoog als de knoppen, en 16 px zodat een iPhone niet inzoomt. */
+.veld {
+  min-height: 44px;
+  width: 100%;
+  min-width: 0;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--lijn);
+  background: var(--grond);
+  color: var(--tekst);
+  font: 500 16px/1.2 var(--font-tekst);
+}
+.veld::placeholder {
+  color: var(--tekst-zacht);
+}
+
+/* ---- De foto ---- */
+
+.huisbeeld {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  /* Staand, zoals een telefoon: dan is er onder het huis plek voor de batterij en de meterkast. */
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--foto-grond);
+  border: 1px solid var(--lijn);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.huisbeeld[data-bewerken="true"] {
+  touch-action: none;
+  outline: 2px dashed color-mix(in srgb, var(--tekst) 45%, transparent);
+  outline-offset: 3px;
+}
+.huisbeeld img.huisfoto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Een zachte schaduw boven en onder, zodat de naamkaartjes ook op een lichte foto te lezen zijn. */
+.huisbeeld::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom, var(--foto-schaduw-boven), transparent 22%, transparent 72%, var(--foto-schaduw-onder));
+}
+
+.stroomlaag {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+/* Een donkere rand onder elke lijn, zodat hij ook op een lichte foto of lucht te zien is. */
+.stroom-onder {
+  fill: none;
+  stroke: var(--foto-lijn-onder);
+  stroke-linecap: round;
+}
+.stroom-spoor {
+  fill: none;
+  stroke: var(--kleur);
+  stroke-opacity: 0.5;
+  stroke-linecap: round;
+}
+/* De stipjes: losse rondjes die met transform langs de lijn lopen (HuisBeeld, Stippen). Zo'n animatie draait op de
+   grafische kaart, niet op de hoofddraad. Geen schaduw: de donkere rand onder de lijn (.stroom-onder) doet dat werk. */
+.stippenlaag {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.stroom-stippen > span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--stip);
+  height: var(--stip);
+  margin: calc(var(--stip) / -2) 0 0 calc(var(--stip) / -2);
+  border-radius: 999px;
+  background: var(--kleur);
+}
+
+.punt {
+  position: absolute;
+  z-index: 2;
+  width: var(--maat, 48px);
+  height: var(--maat, 48px);
+  transform: translate(-50%, -50%);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--kleur);
+}
+.punt-rond {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--foto-rond);
+  border: 2px solid var(--kleur);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--kleur) 16%, transparent), 0 6px 16px rgb(0 0 0 / 0.35);
+  transition: box-shadow 0.3s, opacity 0.3s;
+}
+.punt[data-stil="true"] .punt-rond {
+  border-color: color-mix(in srgb, var(--kleur) 45%, transparent);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.35);
+  color: color-mix(in srgb, var(--kleur) 60%, var(--foto-stil));
+}
+.punt[data-gekozen="true"] .punt-rond {
+  box-shadow: 0 0 0 3px var(--foto-kaartje-tekst), 0 6px 16px rgb(0 0 0 / 0.35);
+}
+.huisbeeld[data-bewerken="true"] .punt {
+  cursor: grab;
+}
+.huisbeeld[data-bewerken="true"] .punt-rond {
+  border-style: dashed;
+}
+.punt[data-sleept="true"] {
+  cursor: grabbing;
+  z-index: 3;
+}
+.punt-ring {
+  position: absolute;
+  inset: -6px;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+/* De ring springt naar het nieuwe vermogen, zonder overgang: een overgang van stroke-dasharray tekent de hele foto
+   elk beeldje opnieuw, bij elke meting (prestaties-9). */
+.punt-kaartje {
+  position: absolute;
+  top: calc(100% + var(--kaartje-afstand, 6px));
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  padding: 3px 9px 4px;
+  border-radius: 9px;
+  background: var(--foto-kaartje);
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* Mensen tikken op het getal dat ze lezen: het kaartje zit in de knop, dus dat telt als een tik op het rondje. */
+.huisbeeld:not([data-bewerken="true"]) .punt-kaartje {
+  pointer-events: auto;
+}
+.punt[data-soort="batterij"] {
+  --kaartje-afstand: 10px;
+}
+.punt[data-boven="true"] .punt-kaartje {
+  top: auto;
+  bottom: calc(100% + var(--kaartje-afstand, 6px));
+}
+.punt[data-kant="links"] .punt-kaartje {
+  left: 0;
+  transform: none;
+  justify-items: start;
+}
+.punt[data-kant="rechts"] .punt-kaartje {
+  left: auto;
+  right: 0;
+  transform: none;
+  justify-items: end;
+}
+.huisbeeld[data-smal="true"] .punt-kaartje {
+  padding: 3px 7px;
+  border-radius: 8px;
+}
+.huisbeeld[data-smal="true"] .punt-waarde {
+  font-size: 11.5px;
+}
+.punt-naam {
+  font: 600 11px/1.2 var(--font-tekst);
+  color: var(--foto-kaartje-zacht);
+  letter-spacing: 0.02em;
+}
+.punt-waarde {
+  font: 700 12.5px/1.2 var(--font-cijfer);
+  color: var(--foto-kaartje-tekst);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Rechtsboven op de foto: wat het net nu per uur kost of oplevert. */
+.geldbordje {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: grid;
+  justify-items: end;
+  gap: 1px;
+  padding: 6px 11px 7px;
+  border-radius: 12px;
+  background: var(--foto-kaartje);
+  pointer-events: none;
+}
+/* Oude cijfers: linksboven zeggen van wanneer, de stroom staat stil en gedimd. */
+.geldbordje[data-soort="oud"] {
+  right: auto;
+  left: 10px;
+  justify-items: start;
+}
+/* Uit beeld, het scherm weg of onder het blad: niets laten bewegen, dat kost een telefoon anders continu rekenwerk.
+   (De stipjes staan dan ook stil: HuisBeeld zet hun animatie uit.) */
+.huisbeeld[data-rust="true"] .huistekening * {
+  animation-play-state: paused;
+}
+.huisbeeld[data-oud="true"] .stroomlaag,
+.huisbeeld[data-oud="true"] .stippenlaag,
+.huisbeeld[data-oud="true"] .punt-ring {
+  opacity: 0.45;
+}
+.geldbordje-woord {
+  font: 600 11px/1.2 var(--font-tekst);
+  color: var(--foto-kaartje-zacht);
+  letter-spacing: 0.02em;
+}
+.geldbordje-bedrag {
+  font: 700 16px/1.15 var(--font-cijfer);
+  font-variant-numeric: tabular-nums;
+  color: var(--foto-kaartje-tekst);
+}
+.geldbordje-per {
+  font: 600 11px/1 var(--font-tekst);
+  color: var(--foto-kaartje-zacht);
+}
+.geldbordje[data-soort="betalen"] .geldbordje-bedrag {
+  color: var(--foto-zon);
+}
+.geldbordje[data-soort="verdienen"] .geldbordje-bedrag {
+  color: var(--foto-batterij);
+}
+
+/* ---- Wat er in de tekening beweegt ---- */
+
+/* De garagedeur (tekening garage) rolt open en dicht als je erop tikt (HuisTekening, GarageDeur). */
+.huistekening .garagedeur-blad {
+  transition: transform 1.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .huistekening .garagedeur-blad {
+    transition: none;
+  }
+}
+
+.huistekening .wieken {
+  transform-origin: 90px 44.6px;
+  animation: wieken-draaien 16s linear infinite;
+}
+@keyframes wieken-draaien {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.huistekening .wolk-a {
+  animation: wolk-a 110s linear infinite;
+  animation-delay: -40s;
+}
+.huistekening .wolk-b {
+  animation: wolk-b 150s linear infinite;
+  animation-delay: -75s;
+}
+.huistekening .wolk-c {
+  animation: wolk-c 190s linear infinite;
+  animation-delay: -120s;
+}
+/* Elke wolk van net buiten links naar net buiten rechts, gerekend vanaf zijn rustplek. */
+@keyframes wolk-a {
+  from {
+    transform: translateX(-80px);
+  }
+  to {
+    transform: translateX(70px);
+  }
+}
+@keyframes wolk-b {
+  from {
+    transform: translateX(-50px);
+  }
+  to {
+    transform: translateX(100px);
+  }
+}
+@keyframes wolk-c {
+  from {
+    transform: translateX(-100px);
+  }
+  to {
+    transform: translateX(50px);
+  }
+}
+/* ---- Het weer van nu op de tekening (HuisTekening, src/lib/weerBeeld.js) ---- */
+
+/* Twee wolken erbij bij een dichte lucht, langzaam. */
+.huistekening .wolk-d {
+  animation: wolk-b 170s linear infinite;
+  animation-delay: -30s;
+}
+.huistekening .wolk-e {
+  animation: wolk-c 210s linear infinite;
+  animation-delay: -150s;
+}
+/* Regen, motregen, sneeuw en hagel, de sterren en de vlag lopen met Web Animations (LUSSEN in HuisTekening). */
+/* Mist: de banen schuiven heel langzaam heen en weer. */
+.huistekening .mist {
+  animation: mist-drijven 24s ease-in-out infinite alternate;
+}
+@keyframes mist-drijven {
+  to {
+    transform: translateX(6px);
+  }
+}
+/* Onweer: elke 9 s een korte dubbele flits; verder niets. */
+.huistekening .flits {
+  animation: flits 9s linear infinite;
+}
+.huistekening .bliksem {
+  animation: bliksem 9s linear infinite;
+}
+@keyframes flits {
+  0%,
+  92%,
+  93.6%,
+  95.6%,
+  100% {
+    opacity: 0;
+  }
+  92.8% {
+    opacity: 0.32;
+  }
+  94.6% {
+    opacity: 0.2;
+  }
+}
+@keyframes bliksem {
+  0%,
+  92%,
+  95.6%,
+  100% {
+    opacity: 0;
+  }
+  92.6%,
+  95% {
+    opacity: 0.95;
+  }
+}
+/* Harde wind en storm: de molen en de wolken sneller, de bomen wiegen. */
+.huistekening[data-wind="stevig"] .wieken {
+  animation-duration: 6s;
+}
+.huistekening[data-wind="storm"] .wieken {
+  animation-duration: 2.4s;
+}
+.huistekening[data-wind] .wolk {
+  animation-duration: 45s;
+}
+.huistekening[data-wind="storm"] .wolk {
+  animation-duration: 22s;
+}
+/* Bomen en hagen bij harde wind: ze wiegen om hun voet (LUSSEN.wieg en .buig in HuisTekening, met Web Animations). */
+.huistekening .boom-wieg,
+.huistekening .haag-wieg {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+/* De vlag (Vlaggenmast in HuisTekening): de stand bij de wind, vast vanaf de mast (0 0).
+   Slap hangt hij smal langs de mast, het uiteinde naar beneden; wapperen hangt hij iets; stevig bijna en bij storm
+   strak horizontaal. Ook bij minder beweging staat hij zo: alleen de golf (LUSSEN.golf) valt dan weg. */
+.huistekening .vlag-doek {
+  transform-origin: 0 0;
+}
+.huistekening .vlag-doek[data-stand="slap"] {
+  transform: skewY(-79deg) scaleX(0.18);
+}
+.huistekening .vlag-doek[data-stand="wapper"] {
+  transform: skewY(-12deg) scaleX(0.93);
+}
+.huistekening .vlag-doek[data-stand="stevig"] {
+  transform: skewY(-4deg) scaleX(0.98);
+}
+
+/* Bij een eigen foto alleen een klein icoon linksonder. */
+.weer-hoek {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--foto-kaartje);
+  color: var(--foto-kaartje-tekst);
+  pointer-events: none;
+}
+
+/* Een glimlicht over de panelen zolang ze leveren. */
+/* Drie keer (ruim 20 s) na het openen, daarna stil: een glans die altijd doorgaat kost alleen maar rekenwerk. */
+.huistekening .glans-huis {
+  animation: glans-huis 7s ease-in-out 3;
+}
+.huistekening .glans-stal {
+  animation: glans-stal 7s ease-in-out 3;
+  animation-delay: -2.5s;
+}
+@keyframes glans-huis {
+  0% {
+    transform: skewX(-18deg) translateX(0);
+  }
+  55%,
+  100% {
+    transform: skewX(-18deg) translateX(72px);
+  }
+}
+@keyframes glans-stal {
+  0% {
+    transform: skewX(-18deg) translateX(0);
+  }
+  55%,
+  100% {
+    transform: skewX(-18deg) translateX(48px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .punt-rond {
+    transition: none;
+  }
+  .huistekening * {
+    animation: none !important;
+  }
+}
+
+/* ---- Onderblad met details ---- */
+
+.blad-achter {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: var(--verduister);
+  /* Vegen op de achtergrond scrolt de pagina niet: die staat stil zolang het blad open is (src/lib/blad.js). */
+  touch-action: none;
+}
+.blad {
+  position: fixed;
+  z-index: 21;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: var(--blad-max, 80vh);
+  overflow-y: auto;
+  background: var(--vlak);
+  border-top: 1px solid var(--lijn);
+  border-radius: 22px 22px 0 0;
+  /* Scrollen in het blad loopt niet door naar de pagina; omlaag vegen schuift het blad mee (--sleep). */
+  overscroll-behavior: contain;
+  transform: translateY(var(--sleep, 0px));
+  transition: transform 0.16s ease-out;
+  padding-top: 8px;
+  padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(18px, env(safe-area-inset-left, 0px));
+  padding-right: max(18px, env(safe-area-inset-right, 0px));
+}
+.blad.slepen {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .blad {
+    transition: none;
+  }
+}
+@media (min-width: 720px) {
+  .blad {
+    left: 50%;
+    right: auto;
+    bottom: 24px;
+    width: min(440px, calc(100vw - 48px));
+    transform: translate(-50%, var(--sleep, 0px));
+    border: 1px solid var(--lijn);
+    border-radius: 22px;
+  }
+  /* Het rondje zit in de onderste helft: het blad bovenaan, zodat het rondje te zien blijft (bladPlek, weergave-17). */
+  .blad[data-plek="boven"] {
+    top: max(24px, env(safe-area-inset-top, 0px));
+    bottom: auto;
+  }
+}
+/* Foto en kaarten naast elkaar: het blad rechts, over de kaarten en niet over de foto (die staat links, hooguit 540 px). */
+@media (min-width: 1024px) {
+  .blad,
+  .blad[data-plek="boven"] {
+    left: auto;
+    top: auto;
+    right: max(24px, calc((100vw - 1088px) / 2));
+    bottom: 24px;
+    width: min(440px, calc(100vw - 600px));
+    max-height: calc(100vh - 48px);
+    transform: translateY(var(--sleep, 0px));
+  }
+}
+
+.schakelaar {
+  position: relative;
+  width: 46px;
+  height: 28px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--vlak-hoog);
+  border: 1px solid var(--lijn);
+}
+.schakelaar::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--tekst-zacht);
+  transition: transform 0.2s;
+}
+[aria-checked="true"] > .schakelaar {
+  background: var(--tekst);
+  border-color: var(--tekst);
+}
+[aria-checked="true"] > .schakelaar::after {
+  transform: translateX(18px);
+  background: var(--grond);
+}
+@media (prefers-reduced-motion: reduce) {
+  .schakelaar::after {
+    transition: none;
+  }
+}
+
+/* ---- Tabbladen onderaan ---- */
+
+.schil[data-tabbalk="true"] {
+  padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+}
+.tabbalk {
+  position: fixed;
+  z-index: 15;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  /* Eén kolom per tabblad (nu vijf), even breed. */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 2px;
+  padding: 4px max(4px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(4px, env(safe-area-inset-left, 0px));
+  background: color-mix(in srgb, var(--vlak) 94%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--lijn);
+}
+@media (min-width: 720px) {
+  .tabbalk {
+    left: 50%;
+    right: auto;
+    bottom: 16px;
+    width: min(560px, calc(100vw - 32px));
+    transform: translateX(-50%);
+    border: 1px solid var(--lijn);
+    border-radius: 22px;
+    padding: 4px;
+  }
+}
+.tab {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 3px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 6px 2px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--tekst-zacht);
+  font: 600 11.5px/1.1 var(--font-tekst);
+  cursor: pointer;
+}
+.tab {
+  container-type: inline-size;
+}
+/* Vijf tabbladen op 320 px: dan ook "Apparaten" net iets kleiner, zodat hij heel blijft. */
+@container (max-width: 60px) {
+  .tab > span {
+    font-size: 10.5px;
+  }
+}
+.tab:hover {
+  color: var(--tekst);
+}
+.tab[aria-selected="true"] {
+  color: var(--tekst);
+  background: var(--vlak-hoog);
+}
+/* Een vraag van het programmaatje (Apparaten, brug 1.4.0): een stipje rechtsboven het icoon. */
+.tab-stip {
+  position: absolute;
+  top: -2px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--apparaat);
+  box-shadow: 0 0 0 2px var(--vlak);
+}
+
+/* ---- Tegels ---- */
+
+/* Smal (twee tegels naast elkaar op de telefoon): het plaatje en het pijltje boven, het kopje eronder over de hele breedte. */
+.tegel {
+  container-type: inline-size;
+}
+.tegel-kop {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "icoon . pijl"
+    "titel titel titel";
+  align-items: center;
+  gap: 8px 10px;
+}
+.tegel-icoon {
+  grid-area: icoon;
+  display: flex;
+}
+.tegel-titel {
+  grid-area: titel;
+  min-width: 0;
+}
+.tegel-pijl {
+  grid-area: pijl;
+  flex: none;
+}
+/* Breed genoeg: alles op één regel. */
+@container (min-width: 220px) {
+  .tegel-kop {
+    grid-template-areas: "icoon titel pijl";
+  }
+}
+
+/* ---- Grafieken ---- */
+
+.grafiek-vlak {
+  position: relative;
+  touch-action: pan-y;
+  border-radius: 12px;
+}
+.grafiek-tip {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  min-width: 112px;
+  max-width: 180px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  border: 1px solid var(--lijn);
+  background: var(--vlak-hoog);
+  color: var(--tekst);
+  font-size: 12.5px;
+  line-height: 1.35;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.25);
+}
+.grafiek-tabel {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.grafiek-tabel th,
+.grafiek-tabel td {
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--lijn);
+  text-align: right;
+}
+.grafiek-tabel th:first-child,
+.grafiek-tabel td:first-child {
+  text-align: left;
+}
+
+/* Het bestandsveld is onzichtbaar (sr-only): de focus tonen op de knop ervoor (Indelen, "Eigen foto kiezen"). */
+.fotoknop:has(+ input:focus-visible) {
+  outline: 2px solid var(--tekst);
+  outline-offset: 2px;
+}

@@ -1,0 +1,8 @@
+{
+  // Alleen voor `npx --yes deno@2.9.6 check base44/functions/*/entry.ts` op deze machine.
+  // Base44 leest dit niet: de CLI stuurt elke functiemap los naar hun Deno.
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "lib": ["deno.window"]
+  }
+}

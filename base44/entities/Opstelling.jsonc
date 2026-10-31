@@ -1,0 +1,93 @@
+{
+  "name": "Opstelling",
+  "type": "object",
+  "description": "Hoe de foto van een huis eruitziet: welke tekening of foto, waar elk rondje staat, welke je niet wilt zien, hoe ze heten, hun maximale vermogen, en de grens en zekering per fase. Eén rij per huis, geschreven door de functie huis voor de eigenaar van dat huis.",
+  "properties": {
+    "huis_id": {
+      "type": "string",
+      "description": "Bij welk huis (Huis.id) deze indeling hoort. Leeg = van voor de omgevingen (oktober 2026); die rij leest niemand meer."
+    },
+    "tekening": {
+      "type": "string",
+      "description": "Welke tekening: 'dierenverblijf' (twee-onder-een-kap met carport en dierenverblijf), 'schuur' (huis met schuur), 'huis' (alleen het huis) of 'garage' (vrijstaand met garage en carport). Een sleutel is 1 tot 30 kleine letters; een sleutel die de site (nog) niet kent, toont hij als met dierenverblijf. Leeg = met dierenverblijf."
+    },
+    "foto_uri": {
+      "type": "string",
+      "description": "De eigen foto van het huis, als privébestand bij Base44 (UploadPrivateFile). Leeg = het getekende huis."
+    },
+    "punten": {
+      "type": "array",
+      "description": "Eigen plekken van de rondjes, in procenten van de breedte en hoogte van de foto. Een rondje dat hier niet staat, krijgt zijn beginplek.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sleutel": { "type": "string", "description": "zon, huis, batterij, net, of de sleutel van een apparaat." },
+          "x": { "type": "number", "description": "Van links, 4 tot 96." },
+          "y": { "type": "number", "description": "Van boven, 4 tot 96." }
+        }
+      }
+    },
+    "verborgen": {
+      "type": "array",
+      "description": "Sleutels van rondjes die niet op de foto staan.",
+      "items": { "type": "string" }
+    },
+    "namen": {
+      "type": "array",
+      "description": "Eigen namen in de app, per rondje (Instellingen › Namen). Gaat voor de naam uit instellingen.json van het programmaatje; een rondje dat hier niet staat, heet zoals thuis het noemt.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sleutel": { "type": "string", "description": "zon, huis, batterij, net, of de sleutel van een zonnebron of apparaat." },
+          "naam": { "type": "string", "description": "De naam in de app, 1 tot 40 tekens." }
+        }
+      }
+    },
+    "vermogens": {
+      "type": "array",
+      "description": "Het maximale vermogen per rondje (Instellingen › Namen), voor de ring om het rondje op de foto: bij een plek met panelen wat die hooguit levert, bij de batterij hoe hard hij hooguit laadt of levert. Een rondje dat hier niet staat: geen ring (panelen) of 2400 W (de batterij, zoals een SolarFlow 2400 AC).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sleutel": { "type": "string", "description": "batterij, zon, of de sleutel van een zonnebron." },
+          "max_w": { "type": "number", "description": "In watt, 100 tot 100.000." }
+        }
+      }
+    },
+    "fase_grens_a": {
+      "type": "number",
+      "description": "Vanaf deze stroom per fase (ampère, 1 tot 200) zegt de app rustig dat een fase zwaar belast is (Nu, Nu in woorden). Alleen tonen, geen alarm. Leeg = 20 A."
+    },
+    "zekering_a": {
+      "type": "number",
+      "description": "De hoofdzekering per fase in ampère (1 tot 200), voor de balken en de zin op Nu ('dicht bij de 25 A van de zekering'). Leeg = 25 A."
+    },
+    "batterij_rol": {
+      "type": "string",
+      "description": "Welke rol de batterij heeft in het Advies (tabblad Huis): 'eigen' (eigen gebruik: zon opslaan en zelf gebruiken, zo min mogelijk uit het net) of 'handelen' (laden als stroom goedkoop is, ook uit het net, en leveren of terugleveren als hij duur is). Alleen voor het advies: de app stuurt de batterij nooit aan. Leeg = 'eigen'."
+    },
+    "gas_standen": {
+      "type": "array",
+      "description": "Gasmeterstanden die de eigenaar zelf invulde (Instellingen › Gas), op datum en oplopend, hooguit 400. Voor een huis waar de P1-meter het gas niet doorgeeft (dan rekent Overzicht het gas per dag hieruit), of als controle. Alleen de actie gasStand van de functie huis schrijft dit veld. Leeg = niets ingevuld.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "datum": { "type": "string", "description": "De dag van de meterstand, Nederlandse tijd, bijvoorbeeld '2026-10-31'." },
+          "stand": { "type": "number", "description": "De meterstand, in m³." }
+        }
+      }
+    },
+    "zon_fase": {
+      "type": "number",
+      "description": "Op welke fase (1, 2 of 3) de eenfase kWh-meter op de zonnepanelen zit, als de eigenaar dat weet (Instellingen › Namen). Alleen om de spanning van die meter naast die van een driefase meter op dezelfde fase te zetten. Leeg = niet bekend."
+    }
+  },
+  // Niemand leest of schrijft dit rechtstreeks: de functie huis doet het met
+  // de rol van de server en toetst zelf (base44/shared/toegang.js).
+  "rls": {
+    "create": { "user_condition": { "role": "admin" } },
+    "read": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}
